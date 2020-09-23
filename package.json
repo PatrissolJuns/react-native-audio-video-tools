@@ -1,0 +1,43 @@
+
+{
+  "name": "react-native-audio-video-tools",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "description": "A set of function to easily manipulate images, audios and videos",
+  "main": "index.js",
+  "types": "./index.d.ts",
+  "repository": "https://github.com/PatrissolJuns/react-native-audio-video-tools.git",
+  "author": "Patrissol Kenfack",
+  "license": "MIT",
+  "private": false,
+  "keywords": [
+    "react-native",
+    "react",
+    "native",
+    "android",
+    "ios",
+    "audio",
+    "video",
+    "images",
+    "react native",
+    "mobile",
+    "ios",
+    "android",
+    "tools",
+    "ffmpeg",
+    "compression",
+    "merging"
+  ],
+  "bugs": {
+    "url": "https://github.com/PatrissolJuns/react-native-audio-video-tools/issues"
+  },
+  "homepage": "https://github.com/PatrissolJuns/react-native-audio-video-tools#readme",
+  "dependencies": {
+    "react-native-ffmpeg": "^0.4.4"
+  },
+  "peerDependencies": {
+    "react-native": "^0.41.2"
+  }
+}
