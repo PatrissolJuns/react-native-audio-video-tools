@@ -84,14 +84,14 @@ const Modal = ({content, isVisible, onCloseClick, leftText, rightText, onLeftCli
                             <Button
                                 title={rightText}
                                 onPress={onRightClick}
-                                buttonStyle={{paddingHorizontal: 20, paddingVertical: 5}}
+                                buttonStyle={{paddingHorizontal: 20, paddingVertical: 5, marginHorizontal: 20, marginLeft: 40}}
                             />
                         </>
                     ) : (
                         <Button
                             title={leftText}
                             onPress={onLeftClick}
-                            buttonStyle={{paddingHorizontal: 20, paddingVertical: 5}}
+                            buttonStyle={{paddingHorizontal: 20, paddingVertical: 5, marginRight: 20}}
                         />
                     )}
                 </View>
@@ -136,12 +136,14 @@ const styles = StyleSheet.create({
     },
     modalBody: {
         paddingHorizontal: 10,
-        marginVertical: 15,
+        marginVertical: 40,
     },
     modalFooter: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         paddingBottom: 10,
+        paddingHorizontal: 10,
+        paddingLeft: 30,
     }
 });
 

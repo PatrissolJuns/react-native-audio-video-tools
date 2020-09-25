@@ -1,21 +1,45 @@
-import React from 'react';
-import {StyleSheet, View} from "react-native";
-import {Button, Header, Icon} from "react-native-elements";
-import DocumentPicker from 'react-native-document-picker';
+import React, {useState} from 'react';
+import {StyleSheet, Text, View} from "react-native";
+import ImagePicker from "react-native-image-crop-picker";
+import {Button, Header, Icon, Input} from "react-native-elements";
+
+import toast from "../toast";
+import {Modal} from "./Modals";
+import {PRIMARY_COLOR} from "../utils";
 
 const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPressed, type}) => {
-    const getFileFromPicker = async (type = DocumentPicker.types.video) => {
-        try {
-            const res = await DocumentPicker.pick({
-                type: [type],
-            });
-            onUploadPressed(res.uri);
-        } catch (err) {
-            if (DocumentPicker.isCancel(err)) {
-                // User cancelled the picker, exit any dialogs or menus and move on
-            } else {
-                throw err;
+    const [remoteUrl, setRemoteUrl] = useState('');
+    const [isSelectModalVisible, setIsSelectModalVisible] = useState(false);
+    const [isUrlInputModalVisible, setIsUrlInputModalVisible] = useState(false);
+
+    const getFileFromUrl = () => {
+        setIsUrlInputModalVisible(true);
+        setIsSelectModalVisible(false);
+    };
+
+    const onRemoteUrlBtnAction = (action) => {
+        if (action === 'Ok') {
+            if (remoteUrl !== '') {
+                onUploadPressed(remoteUrl);
+                setIsUrlInputModalVisible(false);
+                setRemoteUrl('');
             }
+            else toast.error("Please enter a valid url");
+        } else {
+            setIsSelectModalVisible(true);
+            setIsUrlInputModalVisible(false);
+        }
+    };
+
+    const getFileFromPicker = async (type = 'video') => {
+        try {
+            const res = await ImagePicker.openPicker({
+                mediaType: type,
+            });
+            onUploadPressed(res.path);
+            setIsSelectModalVisible(false);
+        } catch (err) {
+            throw err;
         }
     };
 
@@ -35,7 +59,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                 }
                 iconRight
                 title="Select"
-                onPress={() => getFileFromPicker(type)}
+                onPress={() => setIsSelectModalVisible(true)}
             />
         );
     };
@@ -67,6 +91,44 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                     {controlPanel}
                 </View>
             </View>
+            <Modal
+                isVisible={isSelectModalVisible}
+                leftText={"From phone"}
+                rightText={"From url"}
+                onLeftClick={() => getFileFromPicker()}
+                onRightClick={() => getFileFromUrl()}
+                onCloseClick={() => setIsSelectModalVisible(false)}
+                content={(
+                    <Text style={{textAlign: 'center'}}>{`Please select ${type === 'video' ? 'a video' : 'an audio'} file...`}</Text>
+                )}
+            />
+            <Modal
+                isVisible={isUrlInputModalVisible}
+                leftText={"Cancel"}
+                rightText={"Ok"}
+                onLeftClick={() => onRemoteUrlBtnAction('Cancel')}
+                onRightClick={() => onRemoteUrlBtnAction('Ok')}
+                onCloseClick={() => onRemoteUrlBtnAction('Cancel')}
+                content={(
+                    <View>
+                        <Text>Please enter a remote url.</Text>
+                        <Text>Example:
+                            <Text
+                                style={{color: PRIMARY_COLOR}}
+                                onPress={() => setRemoteUrl('http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')}
+                            >
+                                {' '} http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+                            </Text>
+                        </Text>
+                        <Input
+                            value={remoteUrl}
+                            placeholder='url...'
+                            onChangeText={setRemoteUrl}
+                            containerStyle={{marginTop: 5}}
+                        />
+                    </View>
+                )}
+            />
         </>
     );
 };
