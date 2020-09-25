@@ -24,12 +24,51 @@ const COLORS = {
 const PRIMARY_COLOR = COLORS["Summer Sky"];
 const SECONDARY_COLOR = COLORS["Turquoise Blue"];
 
-
 const ROUTES = {
     RESULT: 'Result',
     HOME: 'HOME',
     VIDEO: 'Video',
     AUDIO: 'Audio'
+};
+
+/**
+ * Convert bytes to Bytes, KB, MB, ...
+ * From stackoverflow https://stackoverflow.com/a/18650828/12458141
+ * @param bytes
+ * @param decimals
+ * @returns {string}
+ */
+const formatBytes = (bytes, decimals = 2) => {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
+/**
+ * Convert millisecond to time
+ * From stackoverflow https://stackoverflow.com/a/19700358/12458141
+ * @param duration
+ * @returns {string}
+ */
+const msToTime = (duration) => {
+    let milliseconds = parseInt((duration % 1000) / 100),
+        seconds = Math.floor((duration / 1000) % 60),
+        minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours === "00"
+        ? minutes + ":" + seconds
+        : hours + ":" + minutes + ":" + seconds;
 };
 
 export {
@@ -38,4 +77,6 @@ export {
     ITEMS_PER_ROW,
     PRIMARY_COLOR,
     SECONDARY_COLOR,
+    formatBytes,
+    msToTime,
 }
