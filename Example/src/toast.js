@@ -5,6 +5,7 @@ const toast =  {
         let toast = Toast.show(text, {
             duration: Toast.durations.LONG,
             position: Toast.positions.BOTTOM,
+            opacity: 1,
             shadow: true,
             animation: true,
             hideOnPress: true,

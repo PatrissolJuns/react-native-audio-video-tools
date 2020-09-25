@@ -5777,14 +5777,7 @@ react-is@^16.12.0, react-is@^16.13.0, react-is@^16.7.0, react-is@^16.8.1, react-
 
 react-native-audio-video-tools@../react-native-audio-video-tools-v1.0.0.tgz:
   version "1.0.0"
-  uid "80c6fd28511fe81ba9863e118b2c48da830110cb"
-  resolved "../react-native-audio-video-tools-v1.0.0.tgz#80c6fd28511fe81ba9863e118b2c48da830110cb"
-  dependencies:
-    react-native-ffmpeg "^0.4.4"
-
-"react-native-audio-video-tools@file:../react-native-audio-video-tools-v1.0.0.tgz":
-  version "1.0.0"
-  resolved "file:../react-native-audio-video-tools-v1.0.0.tgz#80c6fd28511fe81ba9863e118b2c48da830110cb"
+  resolved "../react-native-audio-video-tools-v1.0.0.tgz#3babb9fbe976814b4469f46ec756c18847010764"
   dependencies:
     react-native-ffmpeg "^0.4.4"
 

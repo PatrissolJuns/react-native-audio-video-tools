@@ -1,4 +1,5 @@
-import React, {useState, useEffect} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {RNFFmpegConfig} from "react-native-ffmpeg";
 import {StyleSheet, Text, View} from "react-native";
 import {VideoTools} from 'react-native-audio-video-tools';
@@ -8,48 +9,43 @@ import {COLORS, ROUTES} from "../utils";
 import {Modal, ProgressModal} from "../components/Modals";
 import ControlPanelItem from "../components/ControlPanelItem";
 
-
 /**
  * Set of controls button to handle various action on video
- * @param navigation
- * @param videoSource
- * @param setVideoSource
- * @returns {*}
- * @constructor
  */
-const VideoControlPanel = ({navigation, videoSource, setVideoSource}) => {
-    // Initializing VideoTools only once
-    const [videoTools, setVideoTools] = useState(new VideoTools(videoSource));
+class VideoControlPanel extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isCutModalVisible: false,
+            isProgressModalVisible: false,
+            progressModalText: 'Executing...',
+            videoTools: new VideoTools(this.props.videoSource)
+        };
+    }
 
-    const [isCutModalVisible, setIsCutModalVisible] = useState(false);
-    const [isProgressModalVisible, setIsProgressModalVisible] = useState(false);
-    const [progressModalText, setProgressModalText] = useState("Executing...");
-
-    /**
-     * Update internal video tools variable when video source has changed
-     */
-    useEffect(() => {
-        videoTools.setVideoPath(videoSource);
-    }, [videoSource]);
-
-    /**
-     * Enable logCallback to disable/enable log events
-     */
-    useEffect(() => {
+    componentDidMount() {
+        // Enable logCallback to disable/enable log events
         const logCallback = (logData) => {
             // console.log("logData.log => ", logData.log);
         };
         RNFFmpegConfig.enableLogCallback(logCallback);
-    }, []);
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        // Update internal video tools variable when video source has changed
+        if (prevProps.videoSource !== this.props.videoSource) {
+            this.state.videoTools.setVideoPath(this.props.videoSource);
+        }
+    }
 
     /**
      * Run a command only when the input path is correct
      * otherwise display an error message
-     * @param callback
+     * @param callback function to execute
      * @returns {*}
      */
-    const runIfInputFileCorrect = (callback) => {
-        const inputFileStatus = videoTools.isInputFileCorrect();
+    runIfInputFileCorrect = (callback) => {
+        const inputFileStatus = this.state.videoTools.isInputFileCorrect();
         if (inputFileStatus.isCorrect) {
             return callback();
         }
@@ -57,16 +53,15 @@ const VideoControlPanel = ({navigation, videoSource, setVideoSource}) => {
         // toastRef.current.show(inputFileStatus.message);
     };
 
-
     /**
      * Get details of current video
      */
-    const onVideoDetailsPressed = () => {
-        runIfInputFileCorrect(() => {
-            setIsProgressModalVisible(true);
-            videoTools.getDetails()
+    onVideoDetailsPressed = () => {
+        this.runIfInputFileCorrect(() => {
+            this.setState({isProgressModalVisible: true});
+            this.state.videoTools.getDetails()
                 .then(details => {
-                    navigation.navigate(ROUTES.RESULT, {
+                    this.props.navigation.navigate(ROUTES.RESULT, {
                         content: {
                             url: '',
                             details: details,
@@ -77,36 +72,35 @@ const VideoControlPanel = ({navigation, videoSource, setVideoSource}) => {
                 .catch(error => {
                     toast.error(error.toString());
                 })
-                .finally(() => setIsProgressModalVisible(false));
+                .finally(() => this.setState({isProgressModalVisible: false}));
         });
     };
 
-    return (
-        <>
-            <View style={styles.container}>
-                <View style={styles.rowWrapper}>
-                    <ControlPanelItem
-                        text={"Video details"}
-                        bgColor={COLORS["Coral Red"]}
-                        onPress={onVideoDetailsPressed}
-                    />
-                    <ControlPanelItem
-                        bgColor={COLORS.Jade}
-                        text={"Compress Video"}
-                        onPress={() => {
-                            setIsCutModalVisible(true)
-                        }}
-                    />
-                    <ControlPanelItem
-                        bgColor={COLORS.Haiti}
-                        text={"Cut Video"}
-                    />
-                    <ControlPanelItem
-                        bgColor={COLORS["Medium Slate Blue"]}
-                        text={"Extract Audio"}
-                    />
-                </View>
-                {/*<View style={[styles.rowWrapper]}>
+
+    render() {
+        return (
+            <>
+                <View style={styles.container}>
+                    <View style={styles.rowWrapper}>
+                        <ControlPanelItem
+                            text={"Video details"}
+                            bgColor={COLORS["Coral Red"]}
+                            onPress={this.onVideoDetailsPressed}
+                        />
+                        <ControlPanelItem
+                            bgColor={COLORS.Jade}
+                            text={"Compress Video"}
+                        />
+                        <ControlPanelItem
+                            bgColor={COLORS.Haiti}
+                            text={"Cut Video"}
+                        />
+                        <ControlPanelItem
+                            bgColor={COLORS["Medium Slate Blue"]}
+                            text={"Extract Audio"}
+                        />
+                    </View>
+                    {/*<View style={[styles.rowWrapper]}>
                     <ControlPanelItem
                         bgColor={COLORS.Purple}
                         text={"Extract images"}
@@ -134,27 +128,32 @@ const VideoControlPanel = ({navigation, videoSource, setVideoSource}) => {
                         </Text>
                     </TouchableOpacity>
                 </View>*/}
-                <Modal
-                    text={"Loading..."}
-                    isVisible={isCutModalVisible}
-                    rightText={"Ok"}
-                    leftText={"Cancel"}
-                    onLeftClick={() => {
+                    <Modal
+                        text={"Loading..."}
+                        isVisible={this.state.isCutModalVisible}
+                        rightText={"Ok"}
+                        leftText={"Cancel"}
+                        onLeftClick={() => {
 
-                    }}
-                    onCloseClick={() => setIsCutModalVisible(false)}
-                    onRightClick={() => {
+                        }}
+                        onCloseClick={() => this.setState({isCutModalVisible: false})}
+                        onRightClick={() => {
 
-                    }}
-                    content={(
-                        <Text>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet at, eveniet, excepturi fugiat laudantium</Text>
-                    )}
-                />
-                <ProgressModal text={progressModalText} isVisible={isProgressModalVisible} />
-            </View>
-        </>
-    );
-};
+                        }}
+                        content={(
+                            <Text>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet at, eveniet, excepturi fugiat laudantium</Text>
+                        )}
+                    />
+
+                    <ProgressModal
+                        text={this.state.progressModalText}
+                        isVisible={this.state.isProgressModalVisible}
+                    />
+                </View>
+            </>
+        );
+    }
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -172,5 +171,11 @@ const styles = StyleSheet.create({
         // flexWrap: 'wrap',
     },
 });
+
+VideoControlPanel.propTypes = {
+    navigation: PropTypes.any,
+    videoSource: PropTypes.any,
+    setVideoSource: PropTypes.any,
+};
 
 export default VideoControlPanel;
