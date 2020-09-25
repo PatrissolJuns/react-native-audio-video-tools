@@ -18,6 +18,10 @@ buildscript {
     }
 }
 
+ext {
+    reactNativeFFmpegPackage = "min-gpl-lts"
+}
+
 allprojects {
     repositories {
         mavenLocal()
