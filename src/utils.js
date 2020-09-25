@@ -7,9 +7,11 @@ import QUALITY from './enums/Quality';
  * @param path
  * @returns {string}
  */
-const getExtension = (path: String) => {
-    const array = path.split('.');
-    return array[array.length - 1] ? array[array.length - 1] : INCORRECT_INPUT_PATH;
+const getExtension = (path) => {
+    if (typeof path === 'string') {
+        const array = path.split('.');
+        return array[array.length - 1] ? array[array.length - 1] : INCORRECT_INPUT_PATH;
+    } return INCORRECT_INPUT_PATH;
 };
 
 /**
@@ -44,25 +46,33 @@ const getCompressionOptionsResolution = (quality) => {
 
 /**
  * Check compression options
- *
  * @param options
- * @returns {*[]}
+ * @returns {{message: string, isCorrect: boolean}}
  */
 const isOptionsValueCorrect = (options) => {
     if (options) {
         if (options.quality &&
             ![QUALITY.getStaticValueList()].includes(options.quality)) {
-            return [false, "Incorrect quality options. Please provide one of [" +
-            QUALITY.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"];
+            return {
+                isCorrect: false,
+                message: "Incorrect quality options. Please provide one of [" +
+                    QUALITY.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+            };
         }
         if (options.speed &&
             ![PRESET.getStaticValueList()].includes(options.speed)) {
-            return [false, "Incorrect speed options. Please provide one of [" +
-            PRESET.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"];
+            return {
+                isCorrect: false,
+                message: "Incorrect speed options. Please provide one of [" +
+                    PRESET.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+            };
         }
     }
 
-    return [true, ""];
+    return {
+        isCorrect: true,
+        message: ''
+    };
 };
 
 export {

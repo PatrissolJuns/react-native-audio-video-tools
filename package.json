@@ -39,5 +39,16 @@
   },
   "peerDependencies": {
     "react-native": "^0.41.2"
-  }
+  },
+  "files": [
+    "android",
+    "ios",
+    "src",
+    "index.d.ts",
+    "index.js",
+    "LICENSE.txt",
+    "package.json",
+    "README.md",
+    "yarn.lock"
+  ]
 }

@@ -27,14 +27,49 @@ declare module "react-native-audio-video-tools" {
         outputFile?: string;
     }
 
+    type CorrectInputFile = {
+        isCorrect: boolean;
+        message: string;
+    }
+
+    type AnotherMediaInformation = {
+        size: number;
+        width: number;
+        height: number;
+    }
+
+    type MediaDetails = MediaInformation & AnotherMediaInformation;
+
     export class VideoTools {
-        compress:(options: CompressVideo) => Promise<{rc: number, outputFile: string}>;
+        /**
+         * Update a video path
+         */
+        setVideoPath: (videoPath: string) => void;
 
         /**
-         * Retrieve information about a video file
+         * Return boolean to indicate whether input file is correct or not
          */
-        getInformation:() => Promise<MediaInformation>;
+        hasCorrectInputFile: () => boolean;
 
-        execute: (command: String) => Promise<{rc: number}>;
+        /**
+         * Return object including error message in case input file is incorrect
+         * @returns {{message: string, isCorrect: boolean}}
+         */
+        isInputFileCorrect: () => CorrectInputFile;
+
+        /**
+         * Compress video according to parameters
+         */
+        compress: (options: CompressVideo) => Promise<{rc: number, outputFile: string}>;
+
+        /**
+         * Retrieve details about a video file
+         */
+        getDetails:() => Promise<MediaDetails>;
+
+        /**
+         * Run a command
+         */
+        execute: (command: string) => Promise<{rc: number}>;
     }
 }
