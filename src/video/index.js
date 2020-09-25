@@ -22,6 +22,9 @@ class VideoTools {
     constructor(videoPath) {
         this.fullPath = videoPath;
         this.extension = getExtension(videoPath);
+        this.mediaDetails = null;
+
+        this.getOrUpdateCurrentMediaDetails();
     }
 
     /**
@@ -31,6 +34,8 @@ class VideoTools {
     setVideoPath = (videoPath) => {
         this.fullPath = videoPath;
         this.extension = getExtension(videoPath);
+
+        this.getOrUpdateCurrentMediaDetails();
     };
 
     /**
@@ -127,8 +132,20 @@ class VideoTools {
      * Retrieve details about a media
      * @returns {Promise<MediaDetails>}
      */
-    getDetails = () => {
+    getDetails = (force = false) => {
         return new Promise(async (resolve, reject) => {
+            // Check force parameter
+            if (typeof force !== 'boolean') {
+                reject(`Parameter force should be boolean. ${typeof force} given`);
+                return;
+            }
+
+            // Perform cache operation
+            if (!force && this.mediaDetails) {
+                resolve(this.mediaDetails);
+                return;
+            }
+
             const GetAnotherMediaInfoCommand = `-i "${this.fullPath}" -v error -select_streams v:0 -show_entries format=size -show_entries stream=size,width,height -of json`;
             try {
                 const mediaInformation = await RNFFprobe.getMediaInformation(this.fullPath);
@@ -142,11 +159,29 @@ class VideoTools {
                 mediaInformation['width'] = Number(mediaInfo.streams[0].width);
                 mediaInformation['height'] = Number(mediaInfo.streams[0].height);
 
+                // update mediaDetails
+                this.mediaDetails = mediaInformation;
+
+                // return result
                 resolve(mediaInformation);
             } catch (e) {
                 reject(e);
             }
         });
+    };
+
+    /**
+     * Initialize mediaDetails or update it
+     */
+    getOrUpdateCurrentMediaDetails = () => {
+        if (this.hasCorrectInputFile()) {
+            // reset media details so that it cannot get into saved one
+            this.mediaDetails = null;
+
+            this.getDetails()
+                .then({})
+                .catch(() => {});
+        }
     };
 
     /**

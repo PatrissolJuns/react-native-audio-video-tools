@@ -41,6 +41,9 @@ declare module "react-native-audio-video-tools" {
     type MediaDetails = MediaInformation & AnotherMediaInformation;
 
     export class VideoTools {
+        // Property
+        mediaDetails: null | MediaDetails;
+
         /**
          * Update a video path
          */
@@ -65,7 +68,7 @@ declare module "react-native-audio-video-tools" {
         /**
          * Retrieve details about a video file
          */
-        getDetails:() => Promise<MediaDetails>;
+        getDetails:(force: boolean) => Promise<MediaDetails>;
 
         /**
          * Run a command
