@@ -15,16 +15,18 @@ declare module "react-native-audio-video-tools" {
         SUPER_FAST = 'superfast',
         ULTRA_FAST = 'ultrafast',
     }
+
     enum Quality {
         LOW = 'low',
         HIGH = 'high',
         MEDIUM = 'medium',
     }
+
     type CompressVideo = {
+        speed?: Preset;
         bitrate?: string;
         quality?: Quality;
-        speed?: Preset;
-        outputFile?: string;
+        outputFilePath?: string;
     }
 
     type CorrectInputFile = {
@@ -36,6 +38,7 @@ declare module "react-native-audio-video-tools" {
         size: number;
         width: number;
         height: number;
+        extension: string;
     }
 
     type MediaDetails = MediaInformation & AnotherMediaInformation;
@@ -63,7 +66,7 @@ declare module "react-native-audio-video-tools" {
         /**
          * Compress video according to parameters
          */
-        compress: (options: CompressVideo) => Promise<{rc: number, outputFile: string}>;
+        compress: (options: CompressVideo) => Promise<{rc: number, outputFilePath: string}>;
 
         /**
          * Retrieve details about a video file
@@ -73,6 +76,11 @@ declare module "react-native-audio-video-tools" {
         /**
          * Run a command
          */
-        execute: (command: string) => Promise<{rc: number}>;
+        static execute: (command: string) => Promise<{rc: number}>;
+
+        /**
+         * Cancel ongoing command
+         */
+        static cancel: () => void;
     }
 }

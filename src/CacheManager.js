@@ -9,8 +9,8 @@ const { RNAudioVideoTools } = NativeModules;
 const generateFile = (extension) => {
     return new Promise((resolve, reject) => {
         RNAudioVideoTools.generateFile(extension)
-            .then(result => resolve(result))
-            .catch(error => reject(error))
+            .then(result => resolve('file://' + result))
+            .catch(error => reject(error));
     });
 };
 

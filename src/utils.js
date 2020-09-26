@@ -52,7 +52,7 @@ const getCompressionOptionsResolution = (quality) => {
 const isOptionsValueCorrect = (options) => {
     if (options) {
         if (options.quality &&
-            ![QUALITY.getStaticValueList()].includes(options.quality)) {
+            !(QUALITY.getStaticValueList().includes(options.quality))) {
             return {
                 isCorrect: false,
                 message: "Incorrect quality options. Please provide one of [" +
@@ -60,7 +60,7 @@ const isOptionsValueCorrect = (options) => {
             };
         }
         if (options.speed &&
-            ![PRESET.getStaticValueList()].includes(options.speed)) {
+            !(PRESET.getStaticValueList().includes(options.speed))) {
             return {
                 isCorrect: false,
                 message: "Incorrect speed options. Please provide one of [" +

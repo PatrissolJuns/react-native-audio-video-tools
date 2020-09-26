@@ -24,7 +24,7 @@ class VideoTools {
         this.extension = getExtension(videoPath);
         this.mediaDetails = null;
 
-        this.getOrUpdateCurrentMediaDetails();
+        // this.getOrUpdateCurrentMediaDetails();
     }
 
     /**
@@ -32,10 +32,13 @@ class VideoTools {
      * @param videoPath
      */
     setVideoPath = (videoPath) => {
-        this.fullPath = videoPath;
-        this.extension = getExtension(videoPath);
+        if (videoPath !== this.fullPath) {
+            this.mediaDetails = null;
+            this.fullPath = videoPath;
+            this.extension = getExtension(videoPath);
+        }
 
-        this.getOrUpdateCurrentMediaDetails();
+        // this.getOrUpdateCurrentMediaDetails();
     };
 
     /**
@@ -83,18 +86,18 @@ class VideoTools {
             }
 
             // Check if output file is correct
-            let outputFile = undefined;
+            let outputFilePath = undefined;
             try {
                 // use default output file
                 // or use new file from cache folder
                 // TODO: Only generate output file if android
-                outputFile = options.outputFile ? options.outputFile : await generateFile(this.extension);
-                if (outputFile === undefined || outputFile === null) {
-                    reject(options.outputFile ? INCORRECT_OUTPUT_PATH : ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE);
+                outputFilePath = options.outputFilePath ? options.outputFilePath : await generateFile(this.extension);
+                if (outputFilePath === undefined || outputFilePath === null) {
+                    reject(options.outputFilePath ? INCORRECT_OUTPUT_PATH : ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE);
                     return;
                 }
             } catch (e) {
-                reject(options.outputFile ? INCORRECT_OUTPUT_PATH : ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE);
+                reject(options.outputFilePath ? INCORRECT_OUTPUT_PATH : ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE);
                 return;
             }
 
@@ -118,12 +121,12 @@ class VideoTools {
             });
 
             // add output file as last parameters
-            cmd.push(outputFile);
+            cmd.push(outputFilePath);
 
             // execute command
             VideoTools
                 .execute(cmd.join(' '))
-                .then(result => resolve({rc: result, outputFile: outputFile}))
+                .then(result => resolve({rc: result, outputFilePath: outputFilePath}))
                 .catch(error => reject(error));
         });
     };
@@ -148,16 +151,22 @@ class VideoTools {
 
             const GetAnotherMediaInfoCommand = `-i "${this.fullPath}" -v error -select_streams v:0 -show_entries format=size -show_entries stream=size,width,height -of json`;
             try {
-                const mediaInformation = await RNFFprobe.getMediaInformation(this.fullPath);
+                // Since we used "-v error", a work around is to call first this command before the following
                 await RNFFprobe.execute(GetAnotherMediaInfoCommand);
-                // example of output {"programs": [], "streams": [{"width": 640,"height": 360}], "format": {"size": "15804433"}}
 
-                // get result of executed command
+                // get the output result of the command
+                // example of output {"programs": [], "streams": [{"width": 640,"height": 360}], "format": {"size": "15804433"}}
                 let mediaInfo = await RNFFmpegConfig.getLastCommandOutput();
                 mediaInfo = JSON.parse(mediaInfo.lastCommandOutput);
+
+                // execute second command
+                const mediaInformation = await RNFFprobe.getMediaInformation(this.fullPath);
+
+                // treat both results
                 mediaInformation['size'] = Number(mediaInfo.format.size);
                 mediaInformation['width'] = Number(mediaInfo.streams[0].width);
                 mediaInformation['height'] = Number(mediaInfo.streams[0].height);
+                mediaInformation['extension'] = getExtension(this.fullPath);
 
                 // update mediaDetails
                 this.mediaDetails = mediaInformation;
@@ -190,6 +199,11 @@ class VideoTools {
      * @returns {Promise<{rc: number}>}
      */
     static execute = command => RNFFmpeg.execute(command);
+
+    /**
+     * Cancel ongoing command
+     */
+    static cancel = () => RNFFmpeg.cancel();
 }
 
 export default VideoTools;
