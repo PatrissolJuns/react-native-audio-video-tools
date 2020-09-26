@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Modal from 'react-native-modal';
 import {COLORS, PRIMARY_COLOR} from "../utils";
 import {Button, Divider, Icon, Overlay} from "react-native-elements";
 import {ActivityIndicator, StyleSheet, Text, View} from "react-native";
@@ -9,25 +10,37 @@ import {ActivityIndicator, StyleSheet, Text, View} from "react-native";
  *
  * @param text
  * @param isVisible
+ * @param btnText
+ * @param onBtnPress
  * @returns {*}
  * @constructor
  */
-const ProgressModal = ({text, isVisible}) => {
+const ProgressModal = ({text, isVisible, btnText, onBtnPress}) => {
     return (
         <Overlay isVisible={isVisible}>
-            <View
-                style={styles.progressModalContainer}
-            >
-                <ActivityIndicator
-                    size="large"
-                    color={PRIMARY_COLOR}
-                />
-                <Text
-                    style={styles.progressModalText}
-                >
-                    {text}
-                </Text>
-            </View>
+            <>
+                <View style={styles.progressModalContainer}>
+                    <ActivityIndicator
+                        size="large"
+                        color={PRIMARY_COLOR}
+                    />
+                    <Text style={styles.progressModalText}>
+                        {text}
+                    </Text>
+                </View>
+                {btnText && (
+                    <View style={styles.progressModalBtnView}>
+                        <View style={styles.progressModalBtnSubView}>
+                            <Text
+                                onPress={onBtnPress}
+                                style={styles.progressModalBtnText}
+                            >
+                                {btnText}
+                            </Text>
+                        </View>
+                    </View>
+                )}
+            </>
         </Overlay>
     );
 };
@@ -45,9 +58,9 @@ const ProgressModal = ({text, isVisible}) => {
  * @returns {*}
  * @constructor
  */
-const Modal = ({content, isVisible, onCloseClick, leftText, rightText, onLeftClick, onRightClick}) => {
+const CustomModal = ({content, isVisible, onCloseClick, leftText, rightText, onLeftClick, onRightClick}) => {
     return (
-        <Overlay isVisible={isVisible} overlayStyle={styles.container}>
+        <Modal isVisible={isVisible} overlayStyle={styles.container}>
             <View
                 style={styles.wrapper}
             >
@@ -75,7 +88,6 @@ const Modal = ({content, isVisible, onCloseClick, leftText, rightText, onLeftCli
                     {onLeftClick && onRightClick ? (
                         <>
                             <Button
-                                raised
                                 type="outline"
                                 title={leftText}
                                 onPress={onLeftClick}
@@ -96,7 +108,7 @@ const Modal = ({content, isVisible, onCloseClick, leftText, rightText, onLeftCli
                     )}
                 </View>
             </View>
-        </Overlay>
+        </Modal>
     );
 };
 
@@ -105,7 +117,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10
+        padding: 10,
     },
     progressModalText: {
         fontFamily: 'roboto',
@@ -114,12 +126,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginLeft: 5
     },
+    progressModalBtnView: {
+        flexDirection: 'row',
+        marginTop: 5,
+        justifyContent: 'flex-end'
+    },
+    progressModalBtnSubView: {
+        width: 'auto'
+    },
+    progressModalBtnText: {
+        color: PRIMARY_COLOR,
+        paddingRight: 10,
+        textDecorationLine: 'underline'
+    },
     container: {
         backgroundColor: COLORS.White,
         padding: 0,
     },
     wrapper: {
-        maxWidth: '80%',
+        // maxWidth: '80%',
+        backgroundColor: 'white'
     },
     modalHeader: {
         justifyContent: 'center',
@@ -154,5 +180,5 @@ ProgressModal.propTypes = {
 
 export {
     ProgressModal,
-    Modal
+    CustomModal
 };

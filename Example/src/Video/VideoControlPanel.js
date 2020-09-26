@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {RNFFmpegConfig} from "react-native-ffmpeg";
+import {RNFFmpegConfig, RNFFmpeg} from "react-native-ffmpeg";
 import {StyleSheet, Text, View} from "react-native";
 import {VideoTools} from 'react-native-audio-video-tools';
 
 import toast from "../toast";
 import {COLORS, ROUTES} from "../utils";
-import {Modal, ProgressModal} from "../components/Modals";
+import {CustomModal, ProgressModal} from "../components/Modals";
 import ControlPanelItem from "../components/ControlPanelItem";
+import VideoCompressAction from "./VideoCompressAction";
 
 /**
  * Set of controls button to handle various action on video
@@ -17,8 +18,12 @@ class VideoControlPanel extends Component {
         super(props);
         this.state = {
             isCutModalVisible: false,
-            isProgressModalVisible: false,
-            progressModalText: 'Executing...',
+            progressModal: {
+                text: 'Executing...',
+                btnText: null,
+                isVisible: false,
+                onBtnText: () => null
+            },
             videoTools: new VideoTools(this.props.videoSource)
         };
     }
@@ -28,7 +33,7 @@ class VideoControlPanel extends Component {
         const logCallback = (logData) => {
             // console.log("logData.log => ", logData.log);
         };
-        RNFFmpegConfig.enableLogCallback(logCallback);
+        // RNFFmpegConfig.enableLogCallback(logCallback);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -58,13 +63,13 @@ class VideoControlPanel extends Component {
      */
     onVideoDetailsPressed = () => {
         this.runIfInputFileCorrect(() => {
-            this.setState({isProgressModalVisible: true});
+            this.updateProgressModal({isVisible: true});
             this.state.videoTools.getDetails()
                 .then(details => {
                     this.props.navigation.navigate(ROUTES.RESULT, {
                         content: {
                             url: '',
-                            details: details,
+                            mediaDetails: details,
                         },
                         type: 'text'
                     });
@@ -72,10 +77,19 @@ class VideoControlPanel extends Component {
                 .catch(error => {
                     toast.error(error.toString());
                 })
-                .finally(() => this.setState({isProgressModalVisible: false}));
+                .finally(() => this.updateProgressModal({isVisible: false}));
         });
     };
 
+    /**
+     * Update progress modal state
+     */
+    updateProgressModal = (object) => this.setState(prevState => ({
+        progressModal: {
+            ...prevState.progressModal,
+            ...object
+        }
+    }));
 
     render() {
         return (
@@ -87,9 +101,12 @@ class VideoControlPanel extends Component {
                             bgColor={COLORS["Coral Red"]}
                             onPress={this.onVideoDetailsPressed}
                         />
-                        <ControlPanelItem
-                            bgColor={COLORS.Jade}
-                            text={"Compress Video"}
+                        <VideoCompressAction
+                            videoTools={this.state.videoTools}
+                            navigate={this.props.navigation.navigate}
+                            progressModal={this.state.progressModal}
+                            runIfInputFileCorrect={this.runIfInputFileCorrect}
+                            updateProgressModal={this.updateProgressModal}
                         />
                         <ControlPanelItem
                             bgColor={COLORS.Haiti}
@@ -128,7 +145,7 @@ class VideoControlPanel extends Component {
                         </Text>
                     </TouchableOpacity>
                 </View>*/}
-                    <Modal
+                    <CustomModal
                         text={"Loading..."}
                         isVisible={this.state.isCutModalVisible}
                         rightText={"Ok"}
@@ -146,8 +163,10 @@ class VideoControlPanel extends Component {
                     />
 
                     <ProgressModal
-                        text={this.state.progressModalText}
-                        isVisible={this.state.isProgressModalVisible}
+                        text={this.state.progressModal.text}
+                        btnText={this.state.progressModal.btnText}
+                        isVisible={this.state.progressModal.isVisible}
+                        onBtnPress={this.state.progressModal.onBtnText}
                     />
                 </View>
             </>

@@ -4,7 +4,7 @@ import ImagePicker from "react-native-image-crop-picker";
 import {Button, Header, Icon, Input} from "react-native-elements";
 
 import toast from "../toast";
-import {Modal} from "./Modals";
+import {CustomModal} from "./Modals";
 import {PRIMARY_COLOR} from "../utils";
 
 const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPressed, type}) => {
@@ -91,7 +91,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                     {controlPanel}
                 </View>
             </View>
-            <Modal
+            <CustomModal
                 isVisible={isSelectModalVisible}
                 leftText={"From phone"}
                 rightText={"From url"}
@@ -102,7 +102,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                     <Text style={{textAlign: 'center'}}>{`Please select ${type === 'video' ? 'a video' : 'an audio'} file...`}</Text>
                 )}
             />
-            <Modal
+            <CustomModal
                 isVisible={isUrlInputModalVisible}
                 leftText={"Cancel"}
                 rightText={"Ok"}

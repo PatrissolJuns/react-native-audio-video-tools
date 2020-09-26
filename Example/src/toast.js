@@ -1,10 +1,10 @@
 import Toast from 'react-native-root-toast';
 
 const toast =  {
-    error(text, callback = null) {
+    error(text, position = Toast.positions.TOP, callback = null) {
         let toast = Toast.show(text, {
             duration: Toast.durations.LONG,
-            position: Toast.positions.BOTTOM,
+            position: position,
             opacity: 1,
             shadow: true,
             animation: true,

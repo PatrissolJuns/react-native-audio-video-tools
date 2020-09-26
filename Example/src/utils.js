@@ -31,6 +31,8 @@ const ROUTES = {
     AUDIO: 'Audio'
 };
 
+const DEFAULT_EXTENSION = 'mp4';
+
 /**
  * Convert bytes to Bytes, KB, MB, ...
  * From stackoverflow https://stackoverflow.com/a/18650828/12458141
@@ -71,6 +73,14 @@ const msToTime = (duration) => {
         : hours + ":" + minutes + ":" + seconds;
 };
 
+const getExtensionFromVideoTools = (videoTools) => {
+    if (videoTools && videoTools.mediaDetails) {
+        return videoTools.mediaDetails.extension;
+    }
+
+    return DEFAULT_EXTENSION;
+};
+
 export {
     COLORS,
     ROUTES,
@@ -79,4 +89,5 @@ export {
     SECONDARY_COLOR,
     formatBytes,
     msToTime,
+    getExtensionFromVideoTools
 }

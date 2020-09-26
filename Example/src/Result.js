@@ -1,33 +1,39 @@
 import React from 'react';
-import {ScrollView, StyleSheet, View} from "react-native";
-
 import Video from "react-native-video";
-import {formatBytes, msToTime} from "./utils";
 import {ListItem} from "react-native-elements";
+import {ScrollView, StyleSheet, Text, View} from "react-native";
+import {formatBytes, msToTime, PRIMARY_COLOR} from "./utils";
+
+const getDetailsFromVideo = details => {
+    return [
+        ['Size', formatBytes(details.size)],
+        ['Duration', msToTime(details.duration)],
+        ['Resolution', `${details.width}x${details.height}`],
+        ['Extension', details.extension],
+        ['Format', details.format],
+        ['Bitrate', details.bitrate],
+        ['Path', details.path],
+        ['Number of streams', details.streams.length],
+        ['Start time', details.startTime],
+    ];
+};
 
 const Result = (props) => {
     const {type, content} = props.route.params;
-    let details = null;
-    if (content.details) {
-        // list different items to display
-        details = [
-            ['Size', formatBytes(content.details.size)],
-            ['Duration', msToTime(content.details.duration)],
-            ['Resolution', `${content.details.width}x${content.details.height}`],
-            ['Format', content.details.format],
-            ['Bitrate', content.details.bitrate],
-            ['Path', content.details.path],
-            ['Number of streams', content.details.streams.length],
-            ['Start time', content.details.startTime],
-        ];
-    }
+
+    // list different items to display
+    let mediaDetails = null, newMediaDetails = null;
+    if (content.mediaDetails)
+        mediaDetails = getDetailsFromVideo(content.mediaDetails);
+    if (content.newMediaDetails)
+        newMediaDetails = getDetailsFromVideo(content.newMediaDetails);
 
     return (
         <>
             {type === 'text' ? (
                 <ScrollView style={styles.container}>
                     {
-                        details && details.map((detail, i) => (
+                        mediaDetails && mediaDetails.map((detail, i) => (
                             <ListItem key={i} bottomDivider>
                                 <ListItem.Content>
                                     <ListItem.Title>{detail[0]}</ListItem.Title>
@@ -46,16 +52,37 @@ const Result = (props) => {
                         source={{uri: content.url}}
                     />
                     <ScrollView style={styles.scrollView}>
-                        {
-                            details && details.map((detail, i) => (
-                                <ListItem key={i} bottomDivider>
-                                    <ListItem.Content>
-                                        <ListItem.Title>{detail[0]}</ListItem.Title>
-                                        <ListItem.Subtitle>{detail[1]}</ListItem.Subtitle>
-                                    </ListItem.Content>
-                                </ListItem>
-                            ))
-                        }
+                        <View style={styles.scrollViewWrapper}>
+                            <View style={styles.sideView}>
+                                <Text style={styles.introText}>Media details <Text style={{fontWeight: 'bold'}}>before</Text> action</Text>
+                                {
+                                    mediaDetails && mediaDetails.map((detail, i) => (
+                                        <ListItem key={i} bottomDivider>
+                                            <ListItem.Content>
+                                                <ListItem.Title>{detail[0]}</ListItem.Title>
+                                                <ListItem.Subtitle>{detail[1]}</ListItem.Subtitle>
+                                            </ListItem.Content>
+                                        </ListItem>
+                                    ))
+                                }
+                            </View>
+                            <View style={styles.centerView}>
+                                <View style={styles.dividerBar} />
+                            </View>
+                            <View style={styles.sideView}>
+                                <Text style={styles.introText}>Media details <Text style={{fontWeight: 'bold'}}>after</Text> action</Text>
+                                {
+                                    newMediaDetails && newMediaDetails.map((detail, i) => (
+                                        <ListItem key={i} bottomDivider>
+                                            <ListItem.Content>
+                                                <ListItem.Title>{detail[0]}</ListItem.Title>
+                                                <ListItem.Subtitle>{detail[1]}</ListItem.Subtitle>
+                                            </ListItem.Content>
+                                        </ListItem>
+                                    ))
+                                }
+                            </View>
+                        </View>
                     </ScrollView>
                 </View>
             )}
@@ -71,6 +98,32 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    scrollView: {
+        flex: 1,
+        marginTop: 10
+    },
+    scrollViewWrapper: {
+        flexDirection: 'row',
+        paddingVertical: 10
+    },
+    sideView: {
+        flex: 0.48
+    },
+    introText: {
+        marginBottom: 5,
+        textAlign: 'center',
+        fontSize: 16,
+    },
+    centerView: {
+        flex: 0.04,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    dividerBar: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: PRIMARY_COLOR
     }
 });
 
