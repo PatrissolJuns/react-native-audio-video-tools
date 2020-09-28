@@ -2,6 +2,9 @@ import { INCORRECT_INPUT_PATH } from './constants';
 import PRESET from './enums/Preset';
 import QUALITY from './enums/Quality';
 
+// regex to format string time hh:mm:ss
+const timeRegex = /\d\d:\d\d:\d\d/;
+
 /**
  * Extract extension from file url
  * @param path
@@ -58,24 +61,33 @@ const isOptionsValueCorrect = (options, operation) => {
                     !(QUALITY.getStaticValueList().includes(options.quality))) {
                     return {
                         isCorrect: false,
-                        message: "Incorrect quality options. Please provide one of [" +
-                            QUALITY.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+                        message: 'Incorrect option "quality". Please provide one of [' +
+                            QUALITY.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
                     };
                 }
                 if (options.speed &&
                     !(PRESET.getStaticValueList().includes(options.speed))) {
                     return {
                         isCorrect: false,
-                        message: "Incorrect speed options. Please provide one of [" +
-                            PRESET.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+                        message: 'Incorrect option "speed". Please provide one of [' +
+                            PRESET.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
                     };
                 }
                 break;
-            case 'extractAudio':
-                return {
-                    isCorrect: true,
-                    message: ''
-                };
+            case 'cut':
+                if (!timeRegex.test(options.from)) {
+                    return {
+                        isCorrect: false,
+                        message: 'Incorrect option "from". Please provide a valid one matching hh:mm:ss'
+                    };
+                }
+                if (!timeRegex.test(options.to)) {
+                    return {
+                        isCorrect: false,
+                        message: 'Incorrect option "to". Please provide a valid one matching hh:mm:ss'
+                    };
+                }
+                break;
             default: return {
                 isCorrect: true,
                 message: ''
@@ -89,8 +101,55 @@ const isOptionsValueCorrect = (options, operation) => {
     };
 };
 
+/**
+ * Convert time to milliseconds
+ * @param seconds
+ * @param minutes
+ * @param hours
+ */
+const timeToMilliseconds = (seconds = 0, minutes = 0, hours = 0) => {
+    return (hours * 60 * 60 + minutes * 60 + seconds) * 1000;
+};
+
+/**
+ * Convert time fom string to milliseconds
+ * @param time in hh:mm:ss format
+ */
+const timeStringToMilliseconds = (time) => {
+    if (typeof time === 'string' && timeRegex.test(time)) {
+        const array = time.split(':').map(i => Number(i));
+        return ((array[0] * 60 * 60) + (array[1] * 60) + array[2]) * 1000;
+    }
+
+    return NaN;
+};
+
+/**
+ * Convert milliseconds to time
+ * From stackoverflow https://stackoverflow.com/a/19700358/12458141
+ * @param duration
+ * @returns {string}
+ */
+const millisecondsToTime = (duration) => {
+    let milliseconds = parseInt((duration % 1000) / 100),
+        seconds = Math.floor((duration / 1000) % 60),
+        minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours === "00"
+        ? minutes + ":" + seconds
+        : hours + ":" + minutes + ":" + seconds;
+};
+
 export {
     getExtension,
+    millisecondsToTime,
+    timeToMilliseconds,
     isOptionsValueCorrect,
+    timeStringToMilliseconds,
     getCompressionOptionsResolution
 }

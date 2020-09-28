@@ -30,8 +30,14 @@ declare module "react-native-audio-video-tools" {
         outputFilePath?: string;
     }
 
-    type ExractAudio = {
+    type ExtractAudio = {
         extension?: string;
+        outputFilePath?: string;
+    }
+
+    type Cut = {
+        to: string;
+        from: string;
         outputFilePath?: string;
     }
 
@@ -77,14 +83,19 @@ declare module "react-native-audio-video-tools" {
         getDetails:(force: boolean) => Promise<MediaDetails>;
 
         /**
-         * Compress video according to parameters
+         * Compress video
          */
         compress: (options: CompressVideo) => DefaultResponse;
 
         /**
          * Extract audio from video
          */
-        extractAudio: (options: ExractAudio) => DefaultResponse;
+        extractAudio: (options: ExtractAudio) => DefaultResponse;
+
+        /**
+         * Cut video
+         */
+        cut: (options: Cut) => DefaultResponse;
 
         /**
          * Run a command

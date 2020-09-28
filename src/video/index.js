@@ -1,11 +1,11 @@
 import { Platform } from 'react-native';
-import PRESET from '../enums/Preset';
-import QUALITY from '../enums/Quality';
 import { generateFile } from '../CacheManager';
 import {RNFFprobe, RNFFmpeg, RNFFmpegConfig} from 'react-native-ffmpeg';
 import {
     getExtension,
+    millisecondsToTime,
     isOptionsValueCorrect,
+    timeStringToMilliseconds,
     getCompressionOptionsResolution,
 } from '../utils';
 import {
@@ -239,7 +239,54 @@ class VideoTools {
             const { outputFilePath } = checkInputAndOptionsResult;
 
             // construct final command
-            const cmd = `-i "${this.fullPath}" ${outputFilePath}`;
+            const cmd = `-i "${this.fullPath}" "${outputFilePath}"`;
+
+            // execute command
+            VideoTools
+                .execute(cmd)
+                .then(result => resolve({outputFilePath, rc: result}))
+                .catch(error => reject(error));
+        });
+    };
+
+    /**
+     * Cut video
+     * @param options
+     * @returns {Promise<any>}
+     */
+    cut = (options) => {
+        return new Promise(async (resolve, reject) => {
+            // Check input and options values
+            const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'cut');
+            if (!checkInputAndOptionsResult.isCorrect) {
+                reject(checkInputAndOptionsResult.message);
+                return;
+            }
+
+            // Fetch input details in order to get video duration
+            const inputDetails = await this.getDetails();
+            const toDuration = timeStringToMilliseconds(options.to);
+            const fromDuration = timeStringToMilliseconds(options.from);
+
+            // Check for incoherence
+            if (inputDetails.duration < toDuration) {
+                reject('The option "to" can not be greater than the total time of the video');
+                return;
+            }
+
+            if (inputDetails.duration < fromDuration) {
+                reject('The option "from" can not be greater than the total time of the video');
+                return;
+            }
+
+            // get the time to cut the video since ffmpeg use another system
+            const _to = millisecondsToTime(toDuration - fromDuration);
+
+            // get resulting output file path
+            const { outputFilePath } = checkInputAndOptionsResult;
+
+            // construct final command
+            const cmd = `-ss ${options.from} -i "${this.fullPath}" -to ${_to} -c copy "${outputFilePath}"`;
 
             // execute command
             VideoTools
