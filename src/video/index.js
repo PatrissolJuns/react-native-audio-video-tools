@@ -11,7 +11,10 @@ import {
 import {
     INCORRECT_INPUT_PATH,
     INCORRECT_OUTPUT_PATH,
-    ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE, DEFAULT_COMPRESS_OPTIONS, DEFAULT_EXTRACT_AUDIO_OPTIONS
+    ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE,
+    DEFAULT_COMPRESS_OPTIONS,
+    DEFAULT_EXTRACT_AUDIO_OPTIONS,
+    DEFAULT_CONVERT_TO_OPTIONS
 } from '../constants';
 
 class VideoTools {
@@ -287,6 +290,34 @@ class VideoTools {
 
             // construct final command
             const cmd = `-ss ${options.from} -i "${this.fullPath}" -to ${_to} -c copy "${outputFilePath}"`;
+
+            // execute command
+            VideoTools
+                .execute(cmd)
+                .then(result => resolve({outputFilePath, rc: result}))
+                .catch(error => reject(error));
+        });
+    };
+
+    /**
+     * Convert a video to another extension
+     * @param options
+     * @returns {Promise<any>}
+     */
+    convertTo = (options = DEFAULT_CONVERT_TO_OPTIONS) => {
+        return new Promise(async (resolve, reject) => {
+            // Check input and options values
+            const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'convertTo', options.extension);
+            if (!checkInputAndOptionsResult.isCorrect) {
+                reject(checkInputAndOptionsResult.message);
+                return;
+            }
+
+            // get resulting output file path
+            const { outputFilePath } = checkInputAndOptionsResult;
+
+            // construct final command
+            const cmd = `-i "${this.fullPath}" "${outputFilePath}"`;
 
             // execute command
             VideoTools

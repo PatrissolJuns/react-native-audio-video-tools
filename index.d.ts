@@ -93,6 +93,11 @@ declare module "react-native-audio-video-tools" {
         extractAudio: (options: ExtractAudio) => DefaultResponse;
 
         /**
+         * Convert a video to another extension
+         */
+        convertTo: (options: ExtractAudio) => DefaultResponse;
+
+        /**
          * Cut video
          */
         cut: (options: Cut) => DefaultResponse;

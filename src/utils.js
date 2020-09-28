@@ -55,6 +55,13 @@ const getCompressionOptionsResolution = (quality) => {
  */
 const isOptionsValueCorrect = (options, operation) => {
     if (options) {
+        if (typeof options !== 'object') {
+            return {
+                isCorrect: false,
+                message: 'Parameter "options" must be an object'
+            }
+        }
+
         switch (operation) {
             case 'compress':
                 if (options.quality &&
