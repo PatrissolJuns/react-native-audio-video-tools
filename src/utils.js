@@ -45,26 +45,40 @@ const getCompressionOptionsResolution = (quality) => {
 };
 
 /**
- * Check compression options
+ * Check options for various operation
  * @param options
+ * @param operation
  * @returns {{message: string, isCorrect: boolean}}
  */
-const isOptionsValueCorrect = (options) => {
+const isOptionsValueCorrect = (options, operation) => {
     if (options) {
-        if (options.quality &&
-            !(QUALITY.getStaticValueList().includes(options.quality))) {
-            return {
-                isCorrect: false,
-                message: "Incorrect quality options. Please provide one of [" +
-                    QUALITY.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
-            };
-        }
-        if (options.speed &&
-            !(PRESET.getStaticValueList().includes(options.speed))) {
-            return {
-                isCorrect: false,
-                message: "Incorrect speed options. Please provide one of [" +
-                    PRESET.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+        switch (operation) {
+            case 'compress':
+                if (options.quality &&
+                    !(QUALITY.getStaticValueList().includes(options.quality))) {
+                    return {
+                        isCorrect: false,
+                        message: "Incorrect quality options. Please provide one of [" +
+                            QUALITY.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+                    };
+                }
+                if (options.speed &&
+                    !(PRESET.getStaticValueList().includes(options.speed))) {
+                    return {
+                        isCorrect: false,
+                        message: "Incorrect speed options. Please provide one of [" +
+                            PRESET.getStaticValueList().map(item => `'${item}'`).join(', ') + "]"
+                    };
+                }
+                break;
+            case 'extractAudio':
+                return {
+                    isCorrect: true,
+                    message: ''
+                };
+            default: return {
+                isCorrect: true,
+                message: ''
             };
         }
     }

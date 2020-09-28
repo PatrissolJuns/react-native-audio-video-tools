@@ -4,6 +4,7 @@
  */
 declare module "react-native-audio-video-tools" {
     import {MediaInformation} from "react-native-ffmpeg";
+
     enum Preset {
         VERY_SLOW = 'veryslow',
         SLOWER = 'slower',
@@ -29,6 +30,11 @@ declare module "react-native-audio-video-tools" {
         outputFilePath?: string;
     }
 
+    type ExractAudio = {
+        extension?: string;
+        outputFilePath?: string;
+    }
+
     type CorrectInputFile = {
         isCorrect: boolean;
         message: string;
@@ -42,6 +48,8 @@ declare module "react-native-audio-video-tools" {
     }
 
     type MediaDetails = MediaInformation & AnotherMediaInformation;
+
+    type DefaultResponse = Promise<{rc: number, outputFilePath: string}>;
 
     export class VideoTools {
         // Property
@@ -64,14 +72,19 @@ declare module "react-native-audio-video-tools" {
         isInputFileCorrect: () => CorrectInputFile;
 
         /**
-         * Compress video according to parameters
-         */
-        compress: (options: CompressVideo) => Promise<{rc: number, outputFilePath: string}>;
-
-        /**
          * Retrieve details about a video file
          */
         getDetails:(force: boolean) => Promise<MediaDetails>;
+
+        /**
+         * Compress video according to parameters
+         */
+        compress: (options: CompressVideo) => DefaultResponse;
+
+        /**
+         * Extract audio from video
+         */
+        extractAudio: (options: ExractAudio) => DefaultResponse;
 
         /**
          * Run a command
