@@ -53,7 +53,7 @@ const formatBytes = (bytes, decimals = 2) => {
 };
 
 /**
- * Convert millisecond to time
+ * Convert milliseconds to time
  * From stackoverflow https://stackoverflow.com/a/19700358/12458141
  * @param duration
  * @returns {string}
@@ -81,13 +81,16 @@ const getExtensionFromVideoTools = (videoTools) => {
     return DEFAULT_EXTENSION;
 };
 
+const generatedFileName = videoTools => `${Date.now().toString()}.${getExtensionFromVideoTools(videoTools)}`;
+
 export {
     COLORS,
     ROUTES,
     ITEMS_PER_ROW,
     PRIMARY_COLOR,
     SECONDARY_COLOR,
-    formatBytes,
     msToTime,
+    formatBytes,
+    generatedFileName,
     getExtensionFromVideoTools
 }
