@@ -7,6 +7,8 @@ import toast from "../toast";
 import {CustomModal} from "./Modals";
 import {PRIMARY_COLOR} from "../utils";
 
+const DEFAULT_REMOTE_VIDEO_URL = "http://techslides.com/demos/sample-videos/small.mp4";
+
 const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPressed, type}) => {
     const [remoteUrl, setRemoteUrl] = useState('');
     const [isSelectModalVisible, setIsSelectModalVisible] = useState(false);
@@ -117,9 +119,9 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                         <Text>Example:
                             <Text
                                 style={{color: PRIMARY_COLOR}}
-                                onPress={() => setRemoteUrl('http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')}
+                                onPress={() => setRemoteUrl(DEFAULT_REMOTE_VIDEO_URL)}
                             >
-                                {' '} http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+                                {' ' + DEFAULT_REMOTE_VIDEO_URL}
                             </Text>
                         </Text>
                         <Input
