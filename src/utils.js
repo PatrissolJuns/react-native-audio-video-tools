@@ -51,9 +51,10 @@ const getCompressionOptionsResolution = (quality) => {
  * Check options for various operation
  * @param options
  * @param operation
+ * @param mediaType
  * @returns {{message: string, isCorrect: boolean}}
  */
-const isOptionsValueCorrect = (options, operation) => {
+const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
     if (options) {
         if (typeof options !== 'object') {
             return {
@@ -64,21 +65,23 @@ const isOptionsValueCorrect = (options, operation) => {
 
         switch (operation) {
             case 'compress':
-                if (options.quality &&
-                    !(QUALITY.getStaticValueList().includes(options.quality))) {
-                    return {
-                        isCorrect: false,
-                        message: 'Incorrect option "quality". Please provide one of [' +
-                            QUALITY.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
-                    };
-                }
-                if (options.speed &&
-                    !(PRESET.getStaticValueList().includes(options.speed))) {
-                    return {
-                        isCorrect: false,
-                        message: 'Incorrect option "speed". Please provide one of [' +
-                            PRESET.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
-                    };
+                if (mediaType === 'video') {
+                    if (options.quality &&
+                        !(QUALITY.getStaticValueList().includes(options.quality))) {
+                        return {
+                            isCorrect: false,
+                            message: 'Incorrect option "quality". Please provide one of [' +
+                                QUALITY.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
+                        };
+                    }
+                    if (options.speed &&
+                        !(PRESET.getStaticValueList().includes(options.speed))) {
+                        return {
+                            isCorrect: false,
+                            message: 'Incorrect option "speed". Please provide one of [' +
+                                PRESET.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
+                        };
+                    }
                 }
                 break;
             case 'cut':

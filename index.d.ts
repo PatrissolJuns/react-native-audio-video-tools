@@ -30,7 +30,7 @@ declare module "react-native-audio-video-tools" {
         outputFilePath?: string;
     }
 
-    type ExtractAudio = {
+    type DefaultParameters = {
         extension?: string;
         outputFilePath?: string;
     }
@@ -48,30 +48,26 @@ declare module "react-native-audio-video-tools" {
 
     type AnotherMediaInformation = {
         size: number;
-        width: number;
-        height: number;
+        width?: number;
+        height?: number;
         extension: string;
     }
 
-    type MediaDetails = MediaInformation & AnotherMediaInformation;
+    export type MediaDetails = MediaInformation & AnotherMediaInformation;
 
     type DefaultResponse = Promise<{rc: number, outputFilePath: string}>;
 
-    export class VideoTools {
+    class Media {
         // Property
         mediaDetails: null | MediaDetails;
 
         /**
-         * Update a video path
+         * Update media input file with a full path
          */
-        setVideoPath: (videoPath: string) => void;
+        setMediaFullPath: (mediaFullPath: string) => void;
 
         /**
-         * Return boolean to indicate whether input file is correct or not
-         */
-        hasCorrectInputFile: () => boolean;
-
-        /**
+         * Indicate whether input file is correct or not
          * Return object including error message in case input file is incorrect
          * @returns {{message: string, isCorrect: boolean}}
          */
@@ -83,19 +79,9 @@ declare module "react-native-audio-video-tools" {
         getDetails:(force: boolean) => Promise<MediaDetails>;
 
         /**
-         * Compress video
-         */
-        compress: (options: CompressVideo) => DefaultResponse;
-
-        /**
-         * Extract audio from video
-         */
-        extractAudio: (options: ExtractAudio) => DefaultResponse;
-
-        /**
          * Convert a video to another extension
          */
-        convertTo: (options: ExtractAudio) => DefaultResponse;
+        convertTo: (options: DefaultParameters) => DefaultResponse;
 
         /**
          * Cut video
@@ -111,5 +97,20 @@ declare module "react-native-audio-video-tools" {
          * Cancel ongoing command
          */
         static cancel: () => void;
+    }
+
+    export class VideoTools extends Media {
+        /**
+         * Compress video
+         */
+        compress: (options: CompressVideo) => DefaultResponse;
+
+        /**
+         * Extract audio from video
+         */
+        extractAudio: (options: DefaultParameters) => DefaultResponse;
+    }
+
+    export class AudioTools extends Media {
     }
 }
