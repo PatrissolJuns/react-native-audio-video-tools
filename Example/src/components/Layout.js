@@ -92,6 +92,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                 </View>
             </View>
             <CustomModal
+                title={"Choose a file"}
                 isVisible={isSelectModalVisible}
                 leftText={"From phone"}
                 rightText={"From url"}
@@ -103,6 +104,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                 )}
             />
             <CustomModal
+                title={"Url"}
                 isVisible={isUrlInputModalVisible}
                 leftText={"Cancel"}
                 rightText={"Ok"}

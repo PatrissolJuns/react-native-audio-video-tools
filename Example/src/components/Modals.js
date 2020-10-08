@@ -48,6 +48,7 @@ const ProgressModal = ({text, isVisible, btnText, onBtnPress}) => {
 /**
  * Display a modal
  *
+ * @param title
  * @param content
  * @param isVisible
  * @param onCloseClick
@@ -58,14 +59,12 @@ const ProgressModal = ({text, isVisible, btnText, onBtnPress}) => {
  * @returns {*}
  * @constructor
  */
-const CustomModal = ({content, isVisible, onCloseClick, leftText, rightText, onLeftClick, onRightClick}) => {
+const CustomModal = ({title, content, isVisible, onCloseClick, leftText, rightText, onLeftClick, onRightClick}) => {
     return (
         <Modal isVisible={isVisible} overlayStyle={styles.container}>
-            <View
-                style={styles.wrapper}
-            >
+            <View style={styles.wrapper}>
                 <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Title</Text>
+                    <Text style={styles.modalTitle}>{title}</Text>
                     <View
                         style={{
                             position: 'absolute',
