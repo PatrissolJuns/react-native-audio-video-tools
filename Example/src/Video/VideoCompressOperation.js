@@ -47,7 +47,7 @@ const requestWritePermission = async () => {
     }
 };
 
-const VideoCompressAction = ({runIfInputFileCorrect, videoTools, navigate, progressModal, updateProgressModal}) => {
+const VideoCompressOperation = ({runIfInputFileCorrect, videoTools, navigate, progressModal, updateProgressModal}) => {
     const path = 'file://' + RNFS.DocumentDirectoryPath + generatedFileName(videoTools);
     const [quality, setQuality] = useState(QualityList.high);
     const [speed, setSpeed] = useState(SpeedList.veryslow);
@@ -96,14 +96,11 @@ const VideoCompressAction = ({runIfInputFileCorrect, videoTools, navigate, progr
                 const mediaDetails = await videoTools.getDetails();
                 const newMediaDetails = await compressedVideoTools.getDetails();
 
-                // Hide progress modal
-                updateProgressModal({
-                    isVisible: false,
-                });
-
                 // redirect to result page
                 navigate(ROUTES.RESULT, {
                     content: {
+                        mediaType: 'video',
+                        newMediaType: 'video',
                         url: result.outputFilePath,
                         mediaDetails: mediaDetails,
                         newMediaDetails: newMediaDetails,
@@ -112,7 +109,13 @@ const VideoCompressAction = ({runIfInputFileCorrect, videoTools, navigate, progr
                 });
             })
             .catch(error => {
-                console.log("error => ", error);
+                console.log("error inside => ", error);
+            })
+            .finally(() => {
+                // Hide progress modal no matter the issue
+                updateProgressModal({
+                    isVisible: false,
+                });
             });
     };
 
@@ -124,6 +127,7 @@ const VideoCompressAction = ({runIfInputFileCorrect, videoTools, navigate, progr
                 onPress={showCompressOptions}
             />
             <CustomModal
+                title={"Video Compression"}
                 isVisible={isModalVisible}
                 rightText={"Start"}
                 leftText={"Cancel"}
@@ -160,7 +164,8 @@ const VideoCompressAction = ({runIfInputFileCorrect, videoTools, navigate, progr
                         <View style={styles.lisItemContainer}>
                             <Icon name={'info-circle'} type="font-awesome-5"/>
                             <Text style={styles.infoText}>
-                                The higher the speed, the less effective the compression is and can in some cases lead to an opposite effect.
+                                The higher the speed, the less effective the compression is and
+                                can in some cases lead to an <Text style={{fontWeight: 'bold'}}>opposite effect</Text>.
                             </Text>
                         </View>
                     </View>
@@ -170,24 +175,25 @@ const VideoCompressAction = ({runIfInputFileCorrect, videoTools, navigate, progr
     );
 };
 
-VideoCompressAction.propTypes = {
+VideoCompressOperation.propTypes = {
 
 };
 
 const styles = StyleSheet.create({
     lisItemContainer: {
+        marginTop: 10,
+        // width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 10,
-        // width: '100%'
         justifyContent: 'space-between',
     },
     infoText: {
         flex: 1,
+        color: 'red',
         marginLeft: 10,
         flexWrap: 'wrap',
-        fontStyle: 'italic'
+        fontStyle: 'italic',
     }
 });
 
-export default VideoCompressAction;
+export default VideoCompressOperation;
