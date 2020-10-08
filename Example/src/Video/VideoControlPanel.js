@@ -1,15 +1,14 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, Text, View} from "react-native";
+import {StyleSheet, View} from "react-native";
 import {VideoTools, AudioTools} from 'react-native-audio-video-tools';
 
 import toast from "../toast";
 import {COLORS, ROUTES} from "../utils";
-import {CustomModal, ProgressModal} from "../components/Modals";
+import {ProgressModal} from "../components/Modals";
+import ConvertMediaOperation from "./ConvertMediaOperation";
+import CompressMediaOperation from "./CompressMediaOperation";
 import ControlPanelItem from "../components/ControlPanelItem";
-import VideoCompressOperation from "./VideoCompressOperation";
-import VideoCutOperation from "./VideoCutOperation";
-import ConvertVideoOperation from "./ConvertVideoOperation";
 
 /**
  * Set of controls button to handle various action on video
@@ -27,14 +26,6 @@ class VideoControlPanel extends Component {
             },
             videoTools: new VideoTools(this.props.videoSource)
         };
-    }
-
-    componentDidMount() {
-        // Enable logCallback to disable/enable log events
-        const logCallback = (logData) => {
-            // console.log("logData.log => ", logData.log);
-        };
-        // RNFFmpegConfig.enableLogCallback(logCallback);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -56,7 +47,6 @@ class VideoControlPanel extends Component {
             return callback();
         }
         toast.error(inputFileStatus.message);
-        // toastRef.current.show(inputFileStatus.message);
     };
 
     /**
@@ -114,29 +104,12 @@ class VideoControlPanel extends Component {
                         type: 'video',
                     });
                 })
-                .catch(error => {
-                    console.log("error => ", error);
-                    toast.error(error ? error.toString() : error);
-                })
+                .catch(error => toast.error(error ? error.toString() : error))
                 .finally(() => this.updateProgressModal({isVisible: false}));
         });
     };
 
-    test = () => {
-
-        /*let c = `-i "file:///data/user/0/com.rnaudiovideotools/cache/react-native-image-crop-picker/Koc3.mp4" "file:///data/user/0/com.rnaudiovideotools/cache/3cd9677c-d0a3-424b-99a7-d9513fa91d0f.mp3"`;
-        console.log('c => ', c);
-        RNFFmpeg.execute(c)
-            .then(result => {
-                console.log('result => ', result);
-            })
-            .catch(error => {
-                console.log('error => ', error);
-            });*/
-    };
-
     render() {
-        console.log("Au => ", AudioTools);
         return (
             <>
                 <View style={styles.container}>
@@ -146,14 +119,15 @@ class VideoControlPanel extends Component {
                             bgColor={COLORS["Coral Red"]}
                             onPress={this.onVideoDetailsPressed}
                         />
-                        <VideoCompressOperation
-                            videoTools={this.state.videoTools}
+                        <CompressMediaOperation
+                            type={'video'}
+                            mediaTools={this.state.videoTools}
                             progressModal={this.state.progressModal}
                             navigate={this.props.navigation.navigate}
                             updateProgressModal={this.updateProgressModal}
                             runIfInputFileCorrect={this.runIfInputFileCorrect}
                         />
-                        <ConvertVideoOperation
+                        <ConvertMediaOperation
                             type={'video'}
                             mediaTools={this.state.videoTools}
                             progressModal={this.state.progressModal}
@@ -167,51 +141,6 @@ class VideoControlPanel extends Component {
                             bgColor={COLORS["Medium Slate Blue"]}
                         />
                     </View>
-                    {/*<View style={[styles.rowWrapper]}>
-                    <ControlPanelItem
-                        bgColor={COLORS.Purple}
-                        text={"Extract images"}
-                    />
-                    <ControlPanelItem
-                        bgColor={COLORS.Gamboge}
-                        text={"Fast Motion"}
-                    />
-                    <ControlPanelItem
-                        bgColor={COLORS.Haiti}
-                        text={"Cut Video"}
-                    />
-                    <TouchableOpacity
-                        style={[styles.btnItem, {backgroundColor: COLORS["Summer Sky"]}]}
-                    >
-                        <Text style={styles.text}>
-                            Slow Motion
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.btnItem, {backgroundColor: COLORS.Persimmon}]}
-                    >
-                        <Text style={styles.text}>
-                            Add Fade-in
-                        </Text>
-                    </TouchableOpacity>
-                </View>*/}
-                    <CustomModal
-                        title={"Video Compression"}
-                        text={"Loading..."}
-                        isVisible={this.state.isCutModalVisible}
-                        rightText={"Ok"}
-                        leftText={"Cancel"}
-                        onLeftClick={() => {
-
-                        }}
-                        onCloseClick={() => this.setState({isCutModalVisible: false})}
-                        onRightClick={() => {
-
-                        }}
-                        content={(
-                            <Text>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet at, eveniet, excepturi fugiat laudantium</Text>
-                        )}
-                    />
 
                     <ProgressModal
                         text={this.state.progressModal.text}
@@ -228,17 +157,11 @@ class VideoControlPanel extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // flexDirection: 'row',
-        // flexWrap: 'wrap',
-        // alignContent: 'stretch'
         justifyContent: 'flex-end',
-        // backgroundColor: 'black'
     },
     rowWrapper: {
         width: '100%',
         flexDirection: 'row',
-        // alignItems: 'stretch',
-        // flexWrap: 'wrap',
     },
 });
 

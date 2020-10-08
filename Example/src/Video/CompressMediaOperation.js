@@ -2,13 +2,14 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import RNFS from "react-native-fs";
 import {Icon} from "react-native-elements";
+import {StyleSheet, Text, View} from "react-native";
 import DropDownPicker from 'react-native-dropdown-picker';
-import {VideoTools} from 'react-native-audio-video-tools';
-import {StyleSheet, Text, View, Platform, PermissionsAndroid} from "react-native";
+import {AudioTools, VideoTools} from 'react-native-audio-video-tools';
 
+import toast from "../toast";
 import {CustomModal} from "../components/Modals";
+import {COLORS, generatedFileName, ROUTES} from "../utils";
 import ControlPanelItem from "../components/ControlPanelItem";
-import {COLORS, getExtensionFromVideoTools, ROUTES} from "../utils";
 
 const QualityList = {low: 'low', medium: 'medium', high: 'high'};
 const SpeedList = {
@@ -23,47 +24,29 @@ const SpeedList = {
     ultrafast: 'ultrafast'
 };
 
-const generatedFileName = videoTools => `/compress_video_${Date.now().toString()}.${getExtensionFromVideoTools(videoTools)}`;
+const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, navigate, progressModal, updateProgressModal}) => {
+    const MediaTools = type === 'video' ? VideoTools : AudioTools;
+    const outputFilePath = `file://${RNFS.DocumentDirectoryPath}/compress_video_${generatedFileName(mediaTools)}`;
 
-const requestWritePermission = async () => {
-    try {
-        const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            {
-                title: "RNAudioVideoTools App Write Permission",
-                message:
-                    "In order to save media, you need to give us permission to write to your file",
-                buttonNegative: "Deny",
-                buttonPositive: "Allow"
-            }
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log("You can use the camera");
-        } else {
-            console.log("Camera permission denied");
-        }
-    } catch (err) {
-        console.warn(err);
-    }
-};
-
-const VideoCompressOperation = ({runIfInputFileCorrect, videoTools, navigate, progressModal, updateProgressModal}) => {
-    const path = 'file://' + RNFS.DocumentDirectoryPath + generatedFileName(videoTools);
-    const [quality, setQuality] = useState(QualityList.high);
     const [speed, setSpeed] = useState(SpeedList.veryslow);
+    const [quality, setQuality] = useState(QualityList.high);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const showCompressOptions = () => {
         runIfInputFileCorrect(() => {
-            setIsModalVisible(true)
+            if (type === 'video') {
+                setIsModalVisible(true);
+            } else {
+                compressMedia();
+            }
         });
     };
 
-    const compressVideo = () => {
+    const compressMedia = async () => {
         const options = {
-            quality,
             speed,
-            outputFilePath: path
+            quality,
+            outputFilePath,
         };
 
         // Hide modal
@@ -73,50 +56,50 @@ const VideoCompressOperation = ({runIfInputFileCorrect, videoTools, navigate, pr
         updateProgressModal({
             isVisible: true,
             btnText: 'Cancel',
-            text: 'Compressing...',
+            text: 'Compressing... This may take some time.',
             onBtnText: () => {
-                VideoTools.cancel();
+                MediaTools.cancel();
                 // duplicate this action as work around because it seems as the command does not work well once
-                VideoTools.cancel();
+                MediaTools.cancel();
                 updateProgressModal({
                     isVisible: false,
                 });
             },
         });
 
-        // Launch compression
-        videoTools.compress(options)
-            .then(async result => {
-                updateProgressModal({
-                    text: 'Compressing Finished. Getting information about videos...',
-                });
+        try {
+            // Launch compression
+            const result = await mediaTools.compress(options);
 
-                // get different video details in order to show some statistics
-                const compressedVideoTools = new VideoTools(result.outputFilePath);
-                const mediaDetails = await videoTools.getDetails();
-                const newMediaDetails = await compressedVideoTools.getDetails();
-
-                // redirect to result page
-                navigate(ROUTES.RESULT, {
-                    content: {
-                        mediaType: 'video',
-                        newMediaType: 'video',
-                        url: result.outputFilePath,
-                        mediaDetails: mediaDetails,
-                        newMediaDetails: newMediaDetails,
-                    },
-                    type: 'video'
-                });
-            })
-            .catch(error => {
-                console.log("error inside => ", error);
-            })
-            .finally(() => {
-                // Hide progress modal no matter the issue
-                updateProgressModal({
-                    isVisible: false,
-                });
+            updateProgressModal({
+                btnText: null,
+                text: 'Compressing Finished. Getting information about media...',
             });
+
+            // Get different media details in order to show some statistics
+            const compressedMediaTools = new MediaTools(result.outputFilePath);
+            const mediaDetails = await mediaTools.getDetails();
+            const newMediaDetails = await compressedMediaTools.getDetails();
+
+            // redirect to result page
+            navigate(ROUTES.RESULT, {
+                content: {
+                    mediaType: type,
+                    newMediaType: type,
+                    url: result.outputFilePath,
+                    mediaDetails: mediaDetails,
+                    newMediaDetails: newMediaDetails,
+                },
+                type: 'media'
+            });
+        } catch (e) {
+            toast.error(error ? error.toString() : error);
+        }
+
+        // Hide progress modal no matter the issue
+        updateProgressModal({
+            isVisible: false,
+        });
     };
 
     return (
@@ -133,7 +116,7 @@ const VideoCompressOperation = ({runIfInputFileCorrect, videoTools, navigate, pr
                 leftText={"Cancel"}
                 onLeftClick={() => setIsModalVisible(false)}
                 onCloseClick={() => setIsModalVisible(false)}
-                onRightClick={compressVideo}
+                onRightClick={compressMedia}
                 content={(
                     <View style={{}}>
                         <Text>Please select options or leave default one</Text>
@@ -175,14 +158,18 @@ const VideoCompressOperation = ({runIfInputFileCorrect, videoTools, navigate, pr
     );
 };
 
-VideoCompressOperation.propTypes = {
-
+CompressMediaOperation.propTypes = {
+    type: PropTypes.string,
+    navigate: PropTypes.any,
+    mediaTools: PropTypes.any,
+    progressModal: PropTypes.any,
+    updateProgressModal: PropTypes.any,
+    runIfInputFileCorrect: PropTypes.func.isRequired,
 };
 
 const styles = StyleSheet.create({
     lisItemContainer: {
         marginTop: 10,
-        // width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -196,4 +183,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default VideoCompressOperation;
+export default CompressMediaOperation;

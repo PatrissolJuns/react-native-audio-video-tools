@@ -1,12 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import RNFS from "react-native-fs";
-import {StyleSheet, Text, View, Platform, PermissionsAndroid} from "react-native";
+import {StyleSheet, Text, View} from "react-native";
 
+import toast from "../toast";
 import {CustomModal} from "../components/Modals";
 import DropDownPicker from 'react-native-dropdown-picker';
+import {COLORS, generatedFileName, ROUTES} from "../utils";
 import ControlPanelItem from "../components/ControlPanelItem";
-import {COLORS, generatedFileName, msToTime, ROUTES} from "../utils";
 import {VideoTools, AudioTools} from "react-native-audio-video-tools";
 
 const ConvertToList = {
@@ -21,73 +22,16 @@ const ConvertToList = {
     }
 };
 
-class ConvertVideoOperation extends Component {
+class ConvertMediaOperation extends Component {
     constructor(props) {
         super(props);
-        this.outputPath = `file://${RNFS.DocumentDirectoryPath}/convert_video_${generatedFileName(this.props.videoTools)}`;
+        this.outputFilePath = `file://${RNFS.DocumentDirectoryPath}/convert_video_${generatedFileName(this.props.videoTools)}`;
 
         this.state = {
             newExtension: this.props.type === 'video' ? ConvertToList.video.mp4 : ConvertToList.audio.mp3,
             isModalVisible: false
         }
     }
-
-    /*const compressVideo = () => {
-            const options = {
-                quality,
-                speed,
-                outputFilePath: path
-            };
-
-            // Hide modal
-            setIsModalVisible(false);
-
-            // Display progress modal
-            updateProgressModal({
-                isVisible: true,
-                btnText: 'Cancel',
-                text: 'Compressing...',
-                onBtnText: () => {
-                    VideoTools.cancel();
-                    // duplicate this action as work around because it seems as the command does not work well once
-                    VideoTools.cancel();
-                    updateProgressModal({
-                        isVisible: false,
-                    });
-                },
-            });
-
-            // Launch compression
-            videoTools.compress(options)
-                .then(async result => {
-                    updateProgressModal({
-                        text: 'Compressing Finished. Getting information about videos...',
-                    });
-
-                    // get different video details in order to show some statistics
-                    const compressedVideoTools = new VideoTools(result.outputFilePath);
-                    const mediaDetails = await videoTools.getDetails();
-                    const newMediaDetails = await compressedVideoTools.getDetails();
-
-                    // Hide progress modal
-                    updateProgressModal({
-                        isVisible: false,
-                    });
-
-                    // redirect to result page
-                    navigate(ROUTES.RESULT, {
-                        content: {
-                            url: result.outputFilePath,
-                            mediaDetails: mediaDetails,
-                            newMediaDetails: newMediaDetails,
-                        },
-                        type: 'video'
-                    });
-                })
-                .catch(error => {
-                    console.log("error => ", error);
-                });
-        };*/
 
     showConvertOptions = () => {
         this.props.runIfInputFileCorrect(() => {
@@ -122,7 +66,7 @@ class ConvertVideoOperation extends Component {
         this.props
             .mediaTools
             .convertTo({
-                outputPath: this.outputPath,
+                outputPath: this.outputFilePath,
                 extension: this.state.newExtension,
             })
             .then(async result => {
@@ -145,15 +89,13 @@ class ConvertVideoOperation extends Component {
                     type: 'video'
                 });
             })
-            .catch(error => {
-                console.log('error => ', error);
-            })
+            .catch(error => toast.error(error ? error.toString() : error))
             .finally(() => {
                 // Hide progress modal no matter the issue
                 this.props.updateProgressModal({
                     isVisible: false,
                 });
-            })
+            });
     };
 
     render() {
@@ -196,10 +138,9 @@ class ConvertVideoOperation extends Component {
 
 const styles = StyleSheet.create({
     lisItemContainer: {
+        marginTop: 10,
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 10,
-        // width: '100%'
         justifyContent: 'center',
     },
     infoText: {
@@ -215,7 +156,7 @@ const styles = StyleSheet.create({
     },
 });
 
-ConvertVideoOperation.propTypes = {
+ConvertMediaOperation.propTypes = {
     type: PropTypes.string,
     navigate: PropTypes.any,
     mediaTools: PropTypes.any,
@@ -224,4 +165,4 @@ ConvertVideoOperation.propTypes = {
     runIfInputFileCorrect: PropTypes.func.isRequired,
 };
 
-export default ConvertVideoOperation;
+export default ConvertMediaOperation;
