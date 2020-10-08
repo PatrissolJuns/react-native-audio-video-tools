@@ -1,14 +1,15 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {RNFFmpegConfig, RNFFmpeg} from "react-native-ffmpeg";
 import {StyleSheet, Text, View} from "react-native";
-import {VideoTools} from 'react-native-audio-video-tools';
+import {VideoTools, AudioTools} from 'react-native-audio-video-tools';
 
 import toast from "../toast";
 import {COLORS, ROUTES} from "../utils";
 import {CustomModal, ProgressModal} from "../components/Modals";
 import ControlPanelItem from "../components/ControlPanelItem";
-import VideoCompressAction from "./VideoCompressAction";
+import VideoCompressOperation from "./VideoCompressOperation";
+import VideoCutOperation from "./VideoCutOperation";
+import ConvertVideoOperation from "./ConvertVideoOperation";
 
 /**
  * Set of controls button to handle various action on video
@@ -39,7 +40,7 @@ class VideoControlPanel extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         // Update internal video tools variable when video source has changed
         if (prevProps.videoSource !== this.props.videoSource) {
-            this.state.videoTools.setVideoPath(this.props.videoSource);
+            this.state.videoTools.setMediaFullPath(this.props.videoSource);
         }
     }
 
@@ -69,6 +70,7 @@ class VideoControlPanel extends Component {
                     this.props.navigation.navigate(ROUTES.RESULT, {
                         content: {
                             url: '',
+                            mediaType: 'video',
                             mediaDetails: details,
                         },
                         type: 'text'
@@ -91,7 +93,50 @@ class VideoControlPanel extends Component {
         }
     }));
 
+    onExtractAudioPressed = () => {
+        this.runIfInputFileCorrect(() => {
+            this.updateProgressModal({isVisible: true});
+            this.state.videoTools.extractAudio()
+                .then(async result => {
+                    // get different video details in order to show some statistics
+                    const compressedVideoTools = new AudioTools(result.outputFilePath);
+                    const mediaDetails = await this.state.videoTools.getDetails();
+                    const newMediaDetails = await compressedVideoTools.getDetails();
+
+                    this.props.navigation.navigate(ROUTES.RESULT, {
+                        content: {
+                            mediaType: 'video',
+                            newMediaType: 'audio',
+                            url: result.outputFilePath,
+                            mediaDetails: mediaDetails,
+                            newMediaDetails: newMediaDetails,
+                        },
+                        type: 'video',
+                    });
+                })
+                .catch(error => {
+                    console.log("error => ", error);
+                    toast.error(error ? error.toString() : error);
+                })
+                .finally(() => this.updateProgressModal({isVisible: false}));
+        });
+    };
+
+    test = () => {
+
+        /*let c = `-i "file:///data/user/0/com.rnaudiovideotools/cache/react-native-image-crop-picker/Koc3.mp4" "file:///data/user/0/com.rnaudiovideotools/cache/3cd9677c-d0a3-424b-99a7-d9513fa91d0f.mp3"`;
+        console.log('c => ', c);
+        RNFFmpeg.execute(c)
+            .then(result => {
+                console.log('result => ', result);
+            })
+            .catch(error => {
+                console.log('error => ', error);
+            });*/
+    };
+
     render() {
+        console.log("Au => ", AudioTools);
         return (
             <>
                 <View style={styles.container}>
@@ -101,20 +146,25 @@ class VideoControlPanel extends Component {
                             bgColor={COLORS["Coral Red"]}
                             onPress={this.onVideoDetailsPressed}
                         />
-                        <VideoCompressAction
+                        <VideoCompressOperation
                             videoTools={this.state.videoTools}
-                            navigate={this.props.navigation.navigate}
                             progressModal={this.state.progressModal}
-                            runIfInputFileCorrect={this.runIfInputFileCorrect}
+                            navigate={this.props.navigation.navigate}
                             updateProgressModal={this.updateProgressModal}
+                            runIfInputFileCorrect={this.runIfInputFileCorrect}
+                        />
+                        <ConvertVideoOperation
+                            type={'video'}
+                            mediaTools={this.state.videoTools}
+                            progressModal={this.state.progressModal}
+                            navigate={this.props.navigation.navigate}
+                            updateProgressModal={this.updateProgressModal}
+                            runIfInputFileCorrect={this.runIfInputFileCorrect}
                         />
                         <ControlPanelItem
-                            bgColor={COLORS.Haiti}
-                            text={"Cut Video"}
-                        />
-                        <ControlPanelItem
-                            bgColor={COLORS["Medium Slate Blue"]}
                             text={"Extract Audio"}
+                            onPress={this.onExtractAudioPressed}
+                            bgColor={COLORS["Medium Slate Blue"]}
                         />
                     </View>
                     {/*<View style={[styles.rowWrapper]}>
@@ -146,6 +196,7 @@ class VideoControlPanel extends Component {
                     </TouchableOpacity>
                 </View>*/}
                     <CustomModal
+                        title={"Video Compression"}
                         text={"Loading..."}
                         isVisible={this.state.isCutModalVisible}
                         rightText={"Ok"}

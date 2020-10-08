@@ -4,18 +4,24 @@ import {ListItem} from "react-native-elements";
 import {ScrollView, StyleSheet, Text, View} from "react-native";
 import {formatBytes, msToTime, PRIMARY_COLOR} from "./utils";
 
-const getDetailsFromVideo = details => {
-    return [
+const getDetailsFromMedia = (details, type = 'video') => {
+    const result = [
         ['Size', formatBytes(details.size)],
         ['Duration', msToTime(details.duration)],
-        ['Resolution', `${details.width}x${details.height}`],
-        ['Extension', details.extension],
+    ];
+
+    if (type === 'video') {
+        result.push(['Resolution', `${details.width}x${details.height}`]);
+    }
+
+    result.push(['Extension', details.extension],
         ['Format', details.format],
         ['Bitrate', details.bitrate],
         ['Path', details.path],
         ['Number of streams', details.streams.length],
-        ['Start time', details.startTime],
-    ];
+        ['Start time', details.startTime]);
+
+    return result;
 };
 
 const Result = (props) => {
@@ -24,10 +30,9 @@ const Result = (props) => {
     // list different items to display
     let mediaDetails = null, newMediaDetails = null;
     if (content.mediaDetails)
-        mediaDetails = getDetailsFromVideo(content.mediaDetails);
+        mediaDetails = getDetailsFromMedia(content.mediaDetails, content.mediaType);
     if (content.newMediaDetails)
-        newMediaDetails = getDetailsFromVideo(content.newMediaDetails);
-
+        newMediaDetails = getDetailsFromMedia(content.newMediaDetails, content.newMediaType);
     return (
         <>
             {type === 'text' ? (
@@ -56,14 +61,16 @@ const Result = (props) => {
                             <View style={styles.sideView}>
                                 <Text style={styles.introText}>Media details <Text style={{fontWeight: 'bold'}}>before</Text> action</Text>
                                 {
-                                    mediaDetails && mediaDetails.map((detail, i) => (
-                                        <ListItem key={i} bottomDivider>
-                                            <ListItem.Content>
-                                                <ListItem.Title>{detail[0]}</ListItem.Title>
-                                                <ListItem.Subtitle>{detail[1]}</ListItem.Subtitle>
-                                            </ListItem.Content>
-                                        </ListItem>
-                                    ))
+                                    mediaDetails && mediaDetails.map((detail, i) => {
+                                        return (
+                                            <ListItem key={i} bottomDivider>
+                                                <ListItem.Content>
+                                                    <ListItem.Title>{detail[0]}</ListItem.Title>
+                                                    <ListItem.Subtitle>{detail[1]}</ListItem.Subtitle>
+                                                </ListItem.Content>
+                                            </ListItem>
+                                        );
+                                    })
                                 }
                             </View>
                             <View style={styles.centerView}>

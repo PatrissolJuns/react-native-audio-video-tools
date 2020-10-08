@@ -1022,6 +1022,11 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
+"@ptomasroos/react-native-multi-slider@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@ptomasroos/react-native-multi-slider/-/react-native-multi-slider-2.2.2.tgz#35a97fb8c355627c6a2ded010b360ac5728b44ad"
+  integrity sha512-HWyCnRD3Z3SbHK2FLWYmBBqd1B4iXipeKv1+AK0FoY/CElEDTEixHE8hN60TsqxalPrznn798LE2Q4tHuCiyaA==
+
 "@react-native-community/cli-debugger-ui@^4.9.0":
   version "4.9.0"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-debugger-ui/-/cli-debugger-ui-4.9.0.tgz#4177764ba69243c97aa26829d59d9501acb2bd71"
@@ -5784,7 +5789,7 @@ react-native-animatable@1.3.3:
 
 react-native-audio-video-tools@../react-native-audio-video-tools-v1.0.0.tgz:
   version "1.0.0"
-  resolved "../react-native-audio-video-tools-v1.0.0.tgz#ce0aeca84d7922f93e7f18e448c7ac414b689beb"
+  resolved "../react-native-audio-video-tools-v1.0.0.tgz#d5d8ec38d0bf72c38929bd2bed7a55b963ae256f"
   dependencies:
     react-native-ffmpeg "^0.4.4"
 
