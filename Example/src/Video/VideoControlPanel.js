@@ -6,8 +6,9 @@ import {VideoTools, AudioTools} from 'react-native-audio-video-tools';
 import toast from "../toast";
 import {COLORS, ROUTES} from "../utils";
 import {ProgressModal} from "../components/Modals";
-import ConvertMediaOperation from "./ConvertMediaOperation";
-import CompressMediaOperation from "./CompressMediaOperation";
+import ConvertMediaOperation from "../Media/ConvertMediaOperation";
+import MediaDetailsOperation from "../Media/MediaDetailsOperation";
+import CompressMediaOperation from "../Media/CompressMediaOperation";
 import ControlPanelItem from "../components/ControlPanelItem";
 
 /**
@@ -50,30 +51,6 @@ class VideoControlPanel extends Component {
     };
 
     /**
-     * Get details of current video
-     */
-    onVideoDetailsPressed = () => {
-        this.runIfInputFileCorrect(() => {
-            this.updateProgressModal({isVisible: true});
-            this.state.videoTools.getDetails()
-                .then(details => {
-                    this.props.navigation.navigate(ROUTES.RESULT, {
-                        content: {
-                            url: '',
-                            mediaType: 'video',
-                            mediaDetails: details,
-                        },
-                        type: 'text'
-                    });
-                })
-                .catch(error => {
-                    toast.error(error.toString());
-                })
-                .finally(() => this.updateProgressModal({isVisible: false}));
-        });
-    };
-
-    /**
      * Update progress modal state
      */
     updateProgressModal = (object) => this.setState(prevState => ({
@@ -83,6 +60,9 @@ class VideoControlPanel extends Component {
         }
     }));
 
+    /**
+     * Extract an audio from a video
+     */
     onExtractAudioPressed = () => {
         this.runIfInputFileCorrect(() => {
             this.updateProgressModal({isVisible: true});
@@ -114,10 +94,13 @@ class VideoControlPanel extends Component {
             <>
                 <View style={styles.container}>
                     <View style={styles.rowWrapper}>
-                        <ControlPanelItem
-                            text={"Video details"}
-                            bgColor={COLORS["Coral Red"]}
-                            onPress={this.onVideoDetailsPressed}
+                        <MediaDetailsOperation
+                            type={'video'}
+                            mediaTools={this.state.videoTools}
+                            progressModal={this.state.progressModal}
+                            navigate={this.props.navigation.navigate}
+                            updateProgressModal={this.updateProgressModal}
+                            runIfInputFileCorrect={this.runIfInputFileCorrect}
                         />
                         <CompressMediaOperation
                             type={'video'}

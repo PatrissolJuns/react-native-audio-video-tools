@@ -93,7 +93,7 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
                 type: 'media'
             });
         } catch (e) {
-            toast.error(error ? error.toString() : error);
+            toast.error(e ? e.toString() : e);
         }
 
         // Hide progress modal no matter the issue
