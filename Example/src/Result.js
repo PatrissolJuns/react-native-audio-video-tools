@@ -2,12 +2,43 @@ import React, {useState} from 'react';
 import Video from "react-native-video";
 import RNFetchBlob from 'rn-fetch-blob';
 import {Button, Header, Icon, ListItem} from "react-native-elements";
-import {Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {PermissionsAndroid, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 
 import toast from "./toast";
 import SimpleProgressBar from "./components/SimpleProgressBar";
-import {COLORS, formatBytes, msToTime, getPercentage, PRIMARY_COLOR} from "./utils";
+import {askPermission, COLORS, formatBytes, getPercentage, msToTime, PRIMARY_COLOR} from "./utils";
 
+const FS = RNFetchBlob.fs;
+
+/**
+ * Ask permission to perform operation on file file
+ * @returns {Promise<null|boolean>}
+ */
+const isFilePermissionGranted = async () => {
+    try {
+        const readPermission = await askPermission(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            "RNAudioVideoTools App Read Permission",
+            "In order to save your media, We need permission to access your phone folder"
+        );
+        const writePermission = await askPermission(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            "RNAudioVideoTools App Write Permission",
+            "In order to save your media, We need permission to access your phone folder"
+        );
+        return readPermission === PermissionsAndroid.RESULTS.GRANTED
+            && writePermission === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+        return null;
+    }
+};
+
+/**
+ * Return an array of array of details of a media
+ * @param details
+ * @param type
+ * @returns {*[][]}
+ */
 const getDetailsFromMedia = (details, type = 'video') => {
     const result = [
         ['Size', formatBytes(details.size)],
@@ -28,8 +59,6 @@ const getDetailsFromMedia = (details, type = 'video') => {
 
     return result;
 };
-
-const FS = RNFetchBlob.fs;
 
 /**
  * Display a result after an operation
@@ -90,6 +119,18 @@ const Result = (props) => {
         // Save resources to state in order to be able to stop remote downloading
         setDownloadDestinationPath(destinationFileFullPath);
 
+        // Ask permission to access file
+        const _isFilePermissionGranted = await isFilePermissionGranted();
+
+        // The following line is NOT a mistake
+        if (_isFilePermissionGranted === false) {
+            toast.error("You need to grant permission in order to continue");
+            return;
+        } else if (_isFilePermissionGranted === null) {
+            toast.error("An error occur asking permission. Please try again later");
+            return;
+        }
+
         try {
             // Check if the media's source is a remote one
             if (sourceMediaDetails.isRemoteMedia) {
@@ -125,9 +166,7 @@ const Result = (props) => {
             } else {
                 toast.success(`File downloaded successfully. You can get it into library folder`);
             }
-        } catch (e) {
-            toast.error("An error occur while downloading file");
-        }
+        } catch (e) {}
     };
 
     /**
@@ -156,7 +195,6 @@ const Result = (props) => {
      * @returns {*}
      */
     const renderRightComponent = () => {
-
         // Hide download button while downloading
         if (isDownloading) {
             return <View />
