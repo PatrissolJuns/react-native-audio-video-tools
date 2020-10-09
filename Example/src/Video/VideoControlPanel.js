@@ -6,10 +6,10 @@ import {VideoTools, AudioTools} from 'react-native-audio-video-tools';
 import toast from "../toast";
 import {COLORS, ROUTES} from "../utils";
 import {ProgressModal} from "../components/Modals";
+import ControlPanelItem from "../components/ControlPanelItem";
 import ConvertMediaOperation from "../Media/ConvertMediaOperation";
 import MediaDetailsOperation from "../Media/MediaDetailsOperation";
 import CompressMediaOperation from "../Media/CompressMediaOperation";
-import ControlPanelItem from "../components/ControlPanelItem";
 
 /**
  * Set of controls button to handle various action on video
@@ -43,17 +43,25 @@ class VideoControlPanel extends Component {
      * @returns {*}
      */
     runIfInputFileCorrect = async (callback) => {
+        // Display progress modal
         this.updateProgressModal({
             btnText: null,
             isVisible: true,
             text: 'Checking input file...'
         });
+
+        // Start checking input file
         const inputFileStatus = await this.state.videoTools.isInputFileCorrect();
+
+        // If everything went fine
         if (inputFileStatus.isCorrect) {
             this.updateProgressModal({isVisible: false});
             return callback();
         }
+
+        // Otherwise
         toast.error(inputFileStatus.message);
+        this.updateProgressModal({isVisible: false});
     };
 
     /**
@@ -71,14 +79,17 @@ class VideoControlPanel extends Component {
      */
     onExtractAudioPressed = () => {
         this.runIfInputFileCorrect(() => {
+            // Display progress modal
             this.updateProgressModal({
                 btnText: null,
                 isVisible: true,
                 text: 'Extracting audio...',
             });
+
+            // Perform extracting...
             this.state.videoTools.extractAudio()
                 .then(async result => {
-                    // get different video details in order to show some statistics
+                    // Get different video details in order to show some statistics
                     const compressedVideoTools = new AudioTools(result.outputFilePath);
                     const mediaDetails = await this.state.videoTools.getDetails();
                     const newMediaDetails = await compressedVideoTools.getDetails();

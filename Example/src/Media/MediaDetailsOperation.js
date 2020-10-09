@@ -27,35 +27,35 @@ const MediaDetailsOperation = ({type, runIfInputFileCorrect, mediaTools, navigat
      * Get details of current video
      */
     const getMediaDetails = () => {
-        runIfInputFileCorrect(() => {
-            updateProgressModal({
-                btnText: null,
-                isVisible: true,
-                text: 'Executing...',
-            });
-
-            mediaTools
-                .getDetails()
-                .then(details => {
-                    navigate(ROUTES.RESULT, {
-                        content: {
-                            url: '',
-                            mediaType: type,
-                            mediaDetails: details,
-                        },
-                        type: 'text'
-                    });
-                })
-                .catch(error => toast.error(error ? error.toString() : error))
-                .finally(() => updateProgressModal({isVisible: false}));
+        // Display progress modal
+        updateProgressModal({
+            btnText: null,
+            isVisible: true,
+            text: 'Executing...',
         });
+
+        // Getting details...
+        mediaTools
+            .getDetails()
+            .then(details => {
+                navigate(ROUTES.RESULT, {
+                    content: {
+                        url: '',
+                        mediaType: type,
+                        mediaDetails: details,
+                    },
+                    type: 'text'
+                });
+            })
+            .catch(error => toast.error(error ? error.toString() : error))
+            .finally(() => updateProgressModal({isVisible: false}));
     };
 
     return (
         <ControlPanelItem
             bgColor={COLORS["Coral Red"]}
             onPress={onMediaDetailsPressed}
-            text={`${type === 'video' ? 'Video' : 'Audio'} details`}
+            text={`${type === 'audio' ? 'Audio' : 'Video'} details`}
         />
     );
 };

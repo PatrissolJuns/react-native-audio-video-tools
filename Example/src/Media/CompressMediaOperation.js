@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import RNFS from "react-native-fs";
 import {Icon} from "react-native-elements";
 import {StyleSheet, Text, View} from "react-native";
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -8,7 +7,7 @@ import {AudioTools, VideoTools} from 'react-native-audio-video-tools';
 
 import toast from "../toast";
 import {CustomModal} from "../components/Modals";
-import {COLORS, generatedFileName, ROUTES} from "../utils";
+import {COLORS, generatedFileName, getBaseFilename, ROUTES} from "../utils";
 import ControlPanelItem from "../components/ControlPanelItem";
 
 const QualityList = {low: 'low', medium: 'medium', high: 'high'};
@@ -25,8 +24,8 @@ const SpeedList = {
 };
 
 const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, navigate, progressModal, updateProgressModal}) => {
-    const MediaTools = type === 'video' ? VideoTools : AudioTools;
-    const outputFilePath = `file://${RNFS.DocumentDirectoryPath}/compress_video_${generatedFileName(mediaTools)}`;
+    const MediaTools = type === 'audio' ? AudioTools : VideoTools;
+    const outputFilePath = `${getBaseFilename()}/compress_${type}_${generatedFileName(mediaTools, type)}`;
 
     const [speed, setSpeed] = useState(SpeedList.veryslow);
     const [quality, setQuality] = useState(QualityList.high);
@@ -73,7 +72,7 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
 
             updateProgressModal({
                 btnText: null,
-                text: 'Compressing Finished. Getting information about media...',
+                text: 'Getting information about media...',
             });
 
             // Get different media details in order to show some statistics

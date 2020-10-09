@@ -1,14 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import RNFS from "react-native-fs";
 import {StyleSheet, Text, View} from "react-native";
+import {VideoTools, AudioTools} from "react-native-audio-video-tools";
 
 import toast from "../toast";
 import {CustomModal} from "../components/Modals";
 import DropDownPicker from 'react-native-dropdown-picker';
-import {COLORS, generatedFileName, ROUTES} from "../utils";
 import ControlPanelItem from "../components/ControlPanelItem";
-import {VideoTools, AudioTools} from "react-native-audio-video-tools";
+import {COLORS, generatedFileName, getBaseFilename, ROUTES} from "../utils";
 
 const ConvertToList = {
     video: {
@@ -19,21 +18,26 @@ const ConvertToList = {
     audio: {
         'mp3': 'mp3',
         'm4a': 'm4a',
+        'wav': 'wav',
+        'aac': 'aac',
     }
 };
 
+/**
+ * Convert a media from one format to another
+ */
 class ConvertMediaOperation extends Component {
     constructor(props) {
         super(props);
-        this.outputFilePath = `file://${RNFS.DocumentDirectoryPath}/convert_video_${generatedFileName(this.props.videoTools)}`;
+        this.outputFilePath = `${getBaseFilename()}/convert_${this.props.type}_${generatedFileName(this.props.videoTools, this.props.type)}`;
 
         this.state = {
-            newExtension: this.props.type === 'video' ? ConvertToList.video.mp4 : ConvertToList.audio.mp3,
-            isModalVisible: false
+            isModalVisible: false,
+            newExtension: this.props.type === 'audio' ? ConvertToList.audio.mp3 : ConvertToList.video.mp4
         }
     }
 
-    showConvertOptions = () => {
+    handleOnConvertToPressed = () => {
         this.props.runIfInputFileCorrect(() => {
             this.setState({
                 isModalVisible: true,
@@ -70,9 +74,9 @@ class ConvertMediaOperation extends Component {
                 extension: this.state.newExtension,
             })
             .then(async result => {
-                const compressedMediaTools = this.props.type === 'video'
-                    ? new VideoTools(result.outputFilePath)
-                    : new AudioTools(result.outputFilePath);
+                const compressedMediaTools = this.props.type === 'audio'
+                    ? new AudioTools(result.outputFilePath)
+                    : new VideoTools(result.outputFilePath);
 
                 const mediaDetails = await this.props.mediaTools.getDetails();
                 const newMediaDetails = await compressedMediaTools.getDetails();
@@ -104,7 +108,7 @@ class ConvertMediaOperation extends Component {
                 <ControlPanelItem
                     bgColor={COLORS.Haiti}
                     text={`Convert ${this.props.type === 'video' ? 'Video' : 'Audio'}`}
-                    onPress={this.showConvertOptions}
+                    onPress={this.handleOnConvertToPressed}
                 />
                 <CustomModal
                     title={`${this.props.type === 'video' ? 'Video' : 'Audio'} Converting`}
