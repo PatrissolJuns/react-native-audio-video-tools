@@ -1,4 +1,5 @@
 import RNFetchBlob from "rn-fetch-blob";
+import {PermissionsAndroid} from "react-native";
 
 const ITEMS_PER_ROW = 4;
 
@@ -120,6 +121,28 @@ const getPercentage = (completed, total) => {
         : 0;
 };
 
+/**
+ * Check if a given url is valid
+ * @param url
+ * @returns {boolean}
+ */
+const isValidUrl = url => /^(?:\w+:)?\/\/([^\s\.]+\.\S{2}|localhost[\:?\d]*)\S*$/.test(url);
+
+/**
+ * Ask permission for android
+ * @returns {Promise<PermissionStatus>}
+ */
+const askPermission = async (permission, title, message) => {
+    return await PermissionsAndroid.request(
+        permission,
+        {
+            title: title,
+            message: message,
+            buttonNegative: "Deny",
+            buttonPositive: "Allow"
+        }
+    );
+};
 
 export {
     COLORS,
@@ -128,7 +151,9 @@ export {
     PRIMARY_COLOR,
     SECONDARY_COLOR,
     msToTime,
+    isValidUrl,
     formatBytes,
+    askPermission,
     getPercentage,
     getBaseFilename,
     generatedFileName,

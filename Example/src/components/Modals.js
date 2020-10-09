@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         paddingHorizontal: 10,
         paddingLeft: 30,
+        marginBottom: 10,
     }
 });
 

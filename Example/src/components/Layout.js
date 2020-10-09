@@ -5,23 +5,41 @@ import {Button, Header, Icon, Input} from "react-native-elements";
 
 import toast from "../toast";
 import {CustomModal} from "./Modals";
-import {PRIMARY_COLOR} from "../utils";
+import {isValidUrl, PRIMARY_COLOR} from "../utils";
 
 const DEFAULT_REMOTE_VIDEO_URL = "http://techslides.com/demos/sample-videos/small.mp4";
 
+/**
+ * Layout of screens
+ * @param navigation
+ * @param viewContent
+ * @param controlPanel
+ * @param headerText
+ * @param onUploadPressed
+ * @param type
+ * @returns {*}
+ * @constructor
+ */
 const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPressed, type}) => {
     const [remoteUrl, setRemoteUrl] = useState('');
     const [isSelectModalVisible, setIsSelectModalVisible] = useState(false);
     const [isUrlInputModalVisible, setIsUrlInputModalVisible] = useState(false);
 
+    /**
+     * Display url modal
+     */
     const getFileFromUrl = () => {
         setIsUrlInputModalVisible(true);
         setIsSelectModalVisible(false);
     };
 
+    /**
+     * Handle remote url button press action
+     * @param action
+     */
     const onRemoteUrlBtnAction = (action) => {
         if (action === 'Ok') {
-            if (remoteUrl !== '') {
+            if (isValidUrl(remoteUrl)) {
                 onUploadPressed(remoteUrl);
                 setIsUrlInputModalVisible(false);
                 setRemoteUrl('');
@@ -40,9 +58,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
             });
             onUploadPressed(res.path);
             setIsSelectModalVisible(false);
-        } catch (err) {
-            throw err;
-        }
+        } catch (err) {}
     };
 
     const renderRightComponent = () => {
@@ -77,11 +93,6 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                     }
                 }}
                 centerComponent={{ text: headerText, style: { color: '#fff' } }}
-                /*rightComponent={{
-                    icon: 'file-upload',
-                    type: 'font-awesome5',
-                    color: '#fff',
-                }}*/
                 rightComponent={renderRightComponent()}
             />
             <View style={styles.container}>
@@ -108,7 +119,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
             <CustomModal
                 title={"Url"}
                 isVisible={isUrlInputModalVisible}
-                leftText={"Cancel"}
+                leftText={"Back"}
                 rightText={"Ok"}
                 onLeftClick={() => onRemoteUrlBtnAction('Cancel')}
                 onRightClick={() => onRemoteUrlBtnAction('Ok')}

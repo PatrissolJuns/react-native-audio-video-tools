@@ -58,6 +58,12 @@ const isLocaleMedia = path => {
 const getFullFilename = (path) => {
     if (typeof path === 'string') {
         let _path = path;
+
+        // In case of remote media, check if the url would be valid one
+        if (path.includes('http') && !isValidUrl(path)) {
+            return INCORRECT_INPUT_PATH;
+        }
+
         // In case of url, check if it ends with "/" and do not consider it furthermore
         if (_path[_path.length - 1] === '/')
             _path = _path.substring(0, path.length - 1);
@@ -244,7 +250,15 @@ const millisecondsToTime = (duration) => {
         : hours + ":" + minutes + ":" + seconds;
 };
 
+/**
+ * Check if a given url is valid
+ * @param url
+ * @returns {boolean}
+ */
+const isValidUrl = url => /^(?:\w+:)?\/\/([^\s\.]+\.\S{2}|localhost[\:?\d]*)\S*$/.test(url);
+
 export {
+    isValidUrl,
     getFilename,
     getExtension,
     isRemoteMedia,
