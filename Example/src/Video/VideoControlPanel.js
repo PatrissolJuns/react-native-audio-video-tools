@@ -42,9 +42,15 @@ class VideoControlPanel extends Component {
      * @param callback function to execute
      * @returns {*}
      */
-    runIfInputFileCorrect = (callback) => {
-        const inputFileStatus = this.state.videoTools.isInputFileCorrect();
+    runIfInputFileCorrect = async (callback) => {
+        this.updateProgressModal({
+            btnText: null,
+            isVisible: true,
+            text: 'Checking input file...'
+        });
+        const inputFileStatus = await this.state.videoTools.isInputFileCorrect();
         if (inputFileStatus.isCorrect) {
+            this.updateProgressModal({isVisible: false});
             return callback();
         }
         toast.error(inputFileStatus.message);
@@ -65,7 +71,11 @@ class VideoControlPanel extends Component {
      */
     onExtractAudioPressed = () => {
         this.runIfInputFileCorrect(() => {
-            this.updateProgressModal({isVisible: true});
+            this.updateProgressModal({
+                btnText: null,
+                isVisible: true,
+                text: 'Extracting audio...',
+            });
             this.state.videoTools.extractAudio()
                 .then(async result => {
                     // get different video details in order to show some statistics
