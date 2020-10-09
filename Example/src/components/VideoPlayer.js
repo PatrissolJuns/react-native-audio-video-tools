@@ -1,8 +1,18 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Video from "react-native-video";
+import {ProgressModal} from "./Modals";
 import {Text, StyleSheet, View} from "react-native";
 
-const VideoPlayer = ({source, ...restPRops}) => {
+/**
+ * Main media player
+ * @param source
+ * @param restPRops
+ * @returns {*}
+ * @constructor
+ */
+const VideoPlayer = ({source}) => {
+    const [text, setText] = useState('Loading...');
+    const [isVisible, setIsVisible] = useState(false);
     const path = source
         ? source.path ? source.path : source
         : null;
@@ -21,8 +31,18 @@ const VideoPlayer = ({source, ...restPRops}) => {
                     source={{uri: path}}
                     resizeMode={'cover'}
                     style={styles.video}
+                    onLoad={() => setIsVisible(false)}
+                    onLoadStart={() => {
+                        // Only show progress modal when dealing with remote media
+                        if (path.includes('http'))
+                            setIsVisible(true)
+                    }}
                 />
             )}
+            <ProgressModal
+                text={text}
+                isVisible={isVisible}
+            />
         </>
     );
 };
