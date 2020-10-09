@@ -1,20 +1,109 @@
-import { INCORRECT_INPUT_PATH } from './constants';
 import PRESET from './enums/Preset';
 import QUALITY from './enums/Quality';
+import {
+    AUDIO_EXTENSIONS,
+    VIDEO_EXTENSIONS,
+    INCORRECT_INPUT_PATH,
+    DEFAULT_AUDIO_EXTENSION,
+    DEFAULT_VIDEO_EXTENSION,
+} from './constants';
 
-// regex to format string time hh:mm:ss
+// Regex to format string time hh:mm:ss
 const timeRegex = /\d\d:\d\d:\d\d/;
 
 /**
- * Extract extension from file url
+ * Check if a given media path is a local or remote
+ * @param path
+ * @returns {boolean}
+ */
+const isRemoteMedia = path => {
+    return typeof path === 'string'
+        ? path.split(':/')[0].includes('http')
+        : null;
+};
+
+/**
+ * Check whether a given extension is valid
+ * which means among known extensions
+ * @param extension
+ * @param type
+ * @returns {boolean}
+ */
+const isMediaExtensionCorrect = (extension, type) => {
+    if (typeof extension === 'string'
+        && (type === 'audio' || type === 'video')) {
+        const extensionList = type === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
+        return extensionList.includes(extension.toLowerCase());
+    } return false;
+};
+
+/**
+ * Check if a filename is an error one
+ * @param filename
+ * @returns {boolean}
+ */
+const isFileNameError = (filename) => {
+    return filename === INCORRECT_INPUT_PATH;
+};
+
+const isLocaleMedia = path => {
+    return path.split(':/')[0].includes('http');
+};
+
+/**
+ * Extract full file name (with extension) from file path or url
  * @param path
  * @returns {string}
  */
-const getExtension = (path) => {
+const getFullFilename = (path) => {
     if (typeof path === 'string') {
-        const array = path.split('.');
-        return array[array.length - 1] ? array[array.length - 1] : INCORRECT_INPUT_PATH;
+        let _path = path;
+        // In case of url, check if it ends with "/" and do not consider it furthermore
+        if (_path[_path.length - 1] === '/')
+            _path = _path.substring(0, path.length - 1);
+
+        const array = _path.split('/');
+        return array.length > 1 ? array[array.length - 1] : INCORRECT_INPUT_PATH;
     } return INCORRECT_INPUT_PATH;
+};
+
+/**
+ * Extract file name from file path or url
+ * @param path
+ * @returns {string}
+ */
+const getFilename = (path) => {
+    const fullFilename = getFullFilename(path);
+    if (!isFileNameError(fullFilename)) {
+        const array = fullFilename.split('.');
+        return array.length > 1
+            ? array.slice(0, -1).join('')
+            : array.join('');
+    } return fullFilename;
+};
+
+/**
+ * Extract extension from file path or url
+ * @param path
+ * @param type 'audio' | 'video'
+ * @returns {string}
+ */
+const getExtension = (path, type) => {
+    let extension;
+    const fullFilename = getFullFilename(path);
+    if (!isFileNameError(fullFilename)) {
+        const array = fullFilename.split('.');
+
+        // Check if array contains .something
+        if (array.length > 1) {
+            extension = array[array.length - 1];
+            return isMediaExtensionCorrect(extension, type)
+                ? extension
+                : (type === 'audio' ? DEFAULT_AUDIO_EXTENSION : DEFAULT_VIDEO_EXTENSION);
+        }
+
+        return type === 'audio' ? DEFAULT_AUDIO_EXTENSION : DEFAULT_VIDEO_EXTENSION;
+    } return extension;
 };
 
 /**
@@ -156,7 +245,10 @@ const millisecondsToTime = (duration) => {
 };
 
 export {
+    getFilename,
     getExtension,
+    isRemoteMedia,
+    isFileNameError,
     millisecondsToTime,
     timeToMilliseconds,
     isOptionsValueCorrect,

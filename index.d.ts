@@ -50,7 +50,9 @@ declare module "react-native-audio-video-tools" {
         size: number;
         width?: number;
         height?: number;
+        filename: string;
         extension: string;
+        isRemoteMedia: null | boolean;
     }
 
     export type MediaDetails = MediaInformation & AnotherMediaInformation;
@@ -59,6 +61,7 @@ declare module "react-native-audio-video-tools" {
 
     class Media {
         // Property
+        isRemoteMedia: null | boolean;
         mediaDetails: null | MediaDetails;
 
         /**

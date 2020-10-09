@@ -2,16 +2,19 @@ import { Platform } from 'react-native';
 import {generateFile} from "./CacheManager";
 import {RNFFmpeg, RNFFmpegConfig, RNFFprobe} from "react-native-ffmpeg";
 import {
+    getFilename,
     getExtension,
+    isRemoteMedia,
+    isFileNameError,
     millisecondsToTime,
     isOptionsValueCorrect,
     timeStringToMilliseconds
 } from "./utils";
 import {
-    INCORRECT_INPUT_PATH,
     INCORRECT_OUTPUT_PATH,
     DEFAULT_VIDEO_CONVERT_TO_OPTIONS,
     DEFAULT_AUDIO_CONVERT_TO_OPTIONS,
+    ERROR_WHILE_GETTING_INPUT_DETAILS,
     ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE
 } from './constants';
 
@@ -20,10 +23,18 @@ import {
  */
 export default class Media {
     constructor(mediaFullPath, mediaType) {
-        this.mediaFullPath = mediaFullPath;
+        // Determine whether media is an 'audio' or 'video'
         this.mediaType = mediaType;
-        this.extension = getExtension(mediaFullPath);
-        this.mediaDetails = null;
+        // Will contain media details
+        this.mediaDetails = undefined;
+        // Full path of current media
+        this.mediaFullPath = mediaFullPath;
+        // Filename of current media
+        this.filename = getFilename(mediaFullPath);
+        // Check whether the current media is a remote one
+        this.isRemoteMedia = isRemoteMedia(mediaFullPath);
+        // Extension of current media
+        this.extension = getExtension(mediaFullPath, mediaType);
     }
 
     /**
@@ -31,9 +42,12 @@ export default class Media {
      * @param mediaFullPath
      */
     setMediaFullPath = (mediaFullPath) => {
-        this.mediaDetails = null;
+        // Update core property
+        this.mediaDetails = undefined;
         this.mediaFullPath = mediaFullPath;
-        this.extension = getExtension(mediaFullPath);
+        this.filename = getFilename(mediaFullPath);
+        this.isRemoteMedia = isRemoteMedia(mediaFullPath);
+        this.extension = getExtension(mediaFullPath, this.mediaType);
     };
 
     /**
@@ -41,13 +55,23 @@ export default class Media {
      * Display error in case input file is incorrect
      * @returns {{message: string, isCorrect: boolean}}
      */
-    isInputFileCorrect = () => {
-        if (this.extension === INCORRECT_INPUT_PATH) {
+    isInputFileCorrect = async () => {
+        if (isFileNameError(this.filename)) {
             return {
                 isCorrect: false,
-                message: INCORRECT_INPUT_PATH
+                message: this.filename // because filename will contains the error message
             };
         }
+
+        // Get details about input file in order to be sure that is a correct one
+        const details = await this.getDetails().catch(() => null);
+        if (!details) {
+            return {
+                isCorrect: false,
+                message: details || ERROR_WHILE_GETTING_INPUT_DETAILS
+            };
+        }
+
         return {
             isCorrect: true,
             message: ''
@@ -70,7 +94,7 @@ export default class Media {
         };
 
         // Check if the video path is correct
-        const _isInputFileCorrect = this.isInputFileCorrect();
+        const _isInputFileCorrect = await this.isInputFileCorrect();
         if (!_isInputFileCorrect.isCorrect) {
             return _isInputFileCorrect;
         }
@@ -113,7 +137,7 @@ export default class Media {
 
     /**
      * Retrieve details about a media
-     * @returns {Promise<MediaDetails>}
+     * @returns {Promise<MediaDetails | null>}
      */
     getDetails = (force = false) => {
         return new Promise(async (resolve, reject) => {
@@ -146,8 +170,10 @@ export default class Media {
                 const mediaInformation = await RNFFprobe.getMediaInformation(this.mediaFullPath);
 
                 // treat both results
+                mediaInformation['filename'] = this.filename;
+                mediaInformation['extension'] = this.extension;
+                mediaInformation['isRemoteMedia'] = this.isRemoteMedia;
                 mediaInformation['size'] = Number(mediaInfo.format.size);
-                mediaInformation['extension'] = getExtension(this.mediaFullPath);
                 if (this.mediaType === 'video') {
                     mediaInformation['width'] = Number(mediaInfo.streams[0].width);
                     mediaInformation['height'] = Number(mediaInfo.streams[0].height);
@@ -159,6 +185,8 @@ export default class Media {
                 // return result
                 resolve(mediaInformation);
             } catch (e) {
+                // update mediaDetails
+                this.mediaDetails = null;
                 reject(e);
             }
         });
@@ -216,9 +244,9 @@ export default class Media {
      * @param options
      * @returns {Promise<any>}
      */
-    convertTo = (options = (this.mediaType === 'video'
-        ? DEFAULT_VIDEO_CONVERT_TO_OPTIONS
-        : DEFAULT_AUDIO_CONVERT_TO_OPTIONS)) => {
+    convertTo = (options = (this.mediaType === 'audio'
+        ? DEFAULT_AUDIO_CONVERT_TO_OPTIONS
+        : DEFAULT_VIDEO_CONVERT_TO_OPTIONS)) => {
         return new Promise(async (resolve, reject) => {
             // Check input and options values
             const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'convertTo', options.extension);
