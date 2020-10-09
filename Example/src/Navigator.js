@@ -1,14 +1,15 @@
 import * as React from 'react';
-import VideoScreen from './Video/VideoScreen';
-import AudioScreen from './AudioScreen';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
 import {createStackNavigator} from "@react-navigation/stack";
+import {NavigationContainer} from '@react-navigation/native';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+
 import Result from "./Result";
 import {ROUTES} from "./utils";
+import AudioScreen from './Audio/AudioScreen';
+import VideoScreen from './Video/VideoScreen';
 
-const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
 const HomeScreen = () => {
     return (
@@ -22,26 +23,18 @@ const HomeScreen = () => {
 export default function App() {
     return (
         <NavigationContainer>
-            <Stack.Navigator>
+            <Stack.Navigator
+                screenOptions={{
+                    headerShown: false,
+                }}
+            >
                 <Stack.Screen
                     name={ROUTES.HOME}
                     component={HomeScreen}
-                    options={{
-                        headerShown: false,
-                    }}
                 />
                 <Stack.Screen
                     name={ROUTES.RESULT}
                     component={Result}
-                    options={{
-                        headerStyle: {
-                            backgroundColor: '#3295e8',
-                        },
-                        headerTitleStyle: {
-                            color: '#fff'
-                        },
-                        headerTintColor: '#fff'
-                    }}
                 />
             </Stack.Navigator>
         </NavigationContainer>
