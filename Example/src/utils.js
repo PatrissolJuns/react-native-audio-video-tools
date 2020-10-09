@@ -1,3 +1,5 @@
+import RNFetchBlob from "rn-fetch-blob";
+
 const ITEMS_PER_ROW = 4;
 
 const COLORS = {
@@ -31,7 +33,10 @@ const ROUTES = {
     AUDIO: 'Audio'
 };
 
-const DEFAULT_EXTENSION = 'mp4';
+const DEFAULT_EXTENSION = {
+    AUDIO: 'mp3',
+    VIDEO: 'mp4',
+};
 
 /**
  * Convert bytes to Bytes, KB, MB, ...
@@ -73,15 +78,48 @@ const msToTime = (duration) => {
         : hours + ":" + minutes + ":" + seconds;
 };
 
-const getExtensionFromVideoTools = (videoTools) => {
-    if (videoTools && videoTools.mediaDetails) {
-        return videoTools.mediaDetails.extension;
+/**
+ * Return media extension or default one
+ * @param mediaTools
+ * @param type
+ * @returns {string|*}
+ */
+const getExtensionFromMediaTools = (mediaTools, type) => {
+    if (mediaTools && mediaTools.mediaDetails) {
+        return mediaTools.mediaDetails.extension;
     }
 
-    return DEFAULT_EXTENSION;
+    return DEFAULT_EXTENSION[type];
 };
 
-const generatedFileName = videoTools => `${Date.now().toString()}.${getExtensionFromVideoTools(videoTools)}`;
+/**
+ * Get base file name
+ * @returns {string}
+ */
+const getBaseFilename = () => {
+    return 'file://' + RNFetchBlob.fs.dirs.DocumentDir;
+};
+
+/**
+ * Generate a random filename
+ * @param mediaTools
+ * @param type
+ * @returns {string}
+ */
+const generatedFileName = (mediaTools, type) => `${Date.now().toString()}.${getExtensionFromMediaTools(mediaTools, type)}`;
+
+/**
+ * Get percentage
+ * @param completed
+ * @param total
+ * @returns {number}
+ */
+const getPercentage = (completed, total) => {
+    return total > 0
+        ? Math.floor((completed * 100) / total)
+        : 0;
+};
+
 
 export {
     COLORS,
@@ -91,6 +129,8 @@ export {
     SECONDARY_COLOR,
     msToTime,
     formatBytes,
+    getPercentage,
+    getBaseFilename,
     generatedFileName,
-    getExtensionFromVideoTools
+    getExtensionFromMediaTools
 }

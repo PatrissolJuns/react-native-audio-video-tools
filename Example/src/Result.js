@@ -1,8 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Video from "react-native-video";
-import {ListItem} from "react-native-elements";
-import {ScrollView, StyleSheet, Text, View} from "react-native";
-import {formatBytes, msToTime, PRIMARY_COLOR} from "./utils";
+import RNFetchBlob from 'rn-fetch-blob';
+import {Button, Header, Icon, ListItem} from "react-native-elements";
+import {Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+
+import toast from "./toast";
+import SimpleProgressBar from "./components/SimpleProgressBar";
+import {COLORS, formatBytes, msToTime, getPercentage, PRIMARY_COLOR} from "./utils";
 
 const getDetailsFromMedia = (details, type = 'video') => {
     const result = [
@@ -17,6 +21,7 @@ const getDetailsFromMedia = (details, type = 'video') => {
     result.push(['Extension', details.extension],
         ['Format', details.format],
         ['Bitrate', details.bitrate],
+        ['Filename', details.filename],
         ['Path', details.path],
         ['Number of streams', details.streams.length],
         ['Start time', details.startTime]);
@@ -24,7 +29,24 @@ const getDetailsFromMedia = (details, type = 'video') => {
     return result;
 };
 
+const FS = RNFetchBlob.fs;
+
+/**
+ * Display a result after an operation
+ * @param props
+ * @returns {*}
+ * @constructor
+ */
 const Result = (props) => {
+    const [downloadTask, setDownloadTask] = useState(null);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadDestinationPath, setDownloadDestinationPath] = useState(null);
+    const [downloadDetails, setDownloadDetails] = useState({
+        total: 0,
+        received: 0,
+    });
+
+    // Get var from navigator
     const {type, content} = props.route.params;
 
     // list different items to display
@@ -33,8 +55,166 @@ const Result = (props) => {
         mediaDetails = getDetailsFromMedia(content.mediaDetails, content.mediaType);
     if (content.newMediaDetails)
         newMediaDetails = getDetailsFromMedia(content.newMediaDetails, content.newMediaType);
+
+    /**
+     * Handle download whether remote or local file
+     * @returns {Promise<void>}
+     */
+    const handleDownload = async () => {
+        // Get proper source media
+        const sourceMediaDetails = content.newMediaDetails
+            ? content.newMediaDetails
+            : content.mediaDetails;
+
+        // Get source media type
+        const mediaType = content.newMediaDetails ? content.newMediaType : content.mediaType;
+
+        // Set android base path
+        const androidBasepath = mediaType === 'audio' ? FS.dirs.MusicDir : FS.dirs.MovieDir;
+
+        // Get basepath according to platform
+        const basepath = Platform.OS === 'android'
+            ? androidBasepath : FS.dirs.LibraryDir;
+
+        // Create destination filename
+        let destinationFileFullPath = `${basepath}/${sourceMediaDetails.filename}.${sourceMediaDetails.extension}`;
+
+        // Check if the file already exits
+        const isDestinationFileExist = await FS.exists(destinationFileFullPath).catch(() => true);
+
+        if (isDestinationFileExist) {
+            // Give random name in case original name already exits
+            destinationFileFullPath = `${basepath}/${Date.now()}.${sourceMediaDetails.extension}`;
+        }
+
+        // Save resources to state in order to be able to stop remote downloading
+        setDownloadDestinationPath(destinationFileFullPath);
+
+        try {
+            // Check if the media's source is a remote one
+            if (sourceMediaDetails.isRemoteMedia) {
+                setIsDownloading(true);
+                // Initiate downloading
+                const task = RNFetchBlob.config({path : destinationFileFullPath})
+                    .fetch('GET', sourceMediaDetails.path);
+
+                // Save in order to be able to cancel later
+                setDownloadTask(task);
+
+                // Download the file
+                await task.progress((received, total) => {
+                        setDownloadDetails({
+                            total,
+                            received,
+                        });
+                    });
+            } else {
+                // Copy the file instead
+                await FS.cp(sourceMediaDetails.path, destinationFileFullPath);
+            }
+
+            // Hide download box
+            setIsDownloading(false);
+            setDownloadDetails({
+                bytesWritten: 0,
+                contentLength: 0,
+            });
+
+            if (Platform.OS === 'android') {
+                toast.success(`File downloaded successfully. You can get it into ${mediaType === 'audio' ? 'Music' : 'Movies'} folder`);
+            } else {
+                toast.success(`File downloaded successfully. You can get it into library folder`);
+            }
+        } catch (e) {
+            toast.error("An error occur while downloading file");
+        }
+    };
+
+    /**
+     * Handle stop download action
+     * @returns {Promise<void>}
+     */
+    const stopDownload = async () => {
+        try {
+            if (downloadTask && downloadDestinationPath) {
+                downloadTask.cancel(() => {
+                    toast.success("The download was stopped.");
+                    setIsDownloading(false);
+                    setDownloadDetails({
+                        bytesWritten: 0,
+                        contentLength: 0,
+                    });
+                });
+            }
+        } catch (e) {
+            toast.error("An error occur while stopping download");
+        }
+    };
+
+    /**
+     * Right component on header
+     * @returns {*}
+     */
+    const renderRightComponent = () => {
+
+        // Hide download button while downloading
+        if (isDownloading) {
+            return <View />
+        }
+
+        return (
+            <Button
+                icon={
+                    <Icon
+                        name="download"
+                        type="antdesign"
+                        size={15}
+                        color="white"
+                        style={{
+                            marginLeft: 5
+                        }}
+                    />
+                }
+                iconRight
+                title="Download"
+                onPress={handleDownload}
+            />
+        );
+    };
+
+    /**
+     * Left component on header
+     * @returns {*}
+     */
+    const renderLeftComponent = () => {
+        return (
+            <TouchableOpacity
+                style={{padding: 5}}
+                onPress={() => props.navigation.goBack()}
+            >
+                <Icon
+                    name='arrowleft'
+                    type="antdesign"
+                    color={COLORS.White}
+                />
+            </TouchableOpacity>
+        );
+    };
+
     return (
-        <>
+        <View style={{flex: 1}}>
+            <Header
+                placement="left"
+                leftComponent={renderLeftComponent()}
+                centerComponent={{ text: 'Result', style: { color: COLORS.White, fontSize: 20 } }}
+                rightComponent={renderRightComponent()}
+            />
+            {isDownloading && (
+                <SimpleProgressBar
+                    onCancelPress={stopDownload}
+                    completed={getPercentage(downloadDetails.received, downloadDetails.total)}
+                />
+            )}
             {type === 'text' ? (
                 <ScrollView style={styles.container}>
                     {
@@ -93,7 +273,7 @@ const Result = (props) => {
                     </ScrollView>
                 </View>
             )}
-        </>
+        </View>
     );
 };
 
