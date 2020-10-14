@@ -1,13 +1,12 @@
 import React, {useState} from 'react';
 import RNFetchBlob from "rn-fetch-blob";
-import {StyleSheet, Text, View} from "react-native";
-import ImagePicker from "react-native-image-crop-picker";
 import DocumentPicker from 'react-native-document-picker';
 import {Button, Header, Icon, Input} from "react-native-elements";
+import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
 
 import toast from "../toast";
 import {CustomModal} from "./Modals";
-import {isValidUrl, PRIMARY_COLOR} from "../utils";
+import {COLORS, isValidUrl, PRIMARY_COLOR} from "../utils";
 
 const FS = RNFetchBlob.fs;
 const DEFAULT_REMOTE_VIDEO_URL = "http://techslides.com/demos/sample-videos/small.mp4";
@@ -20,7 +19,7 @@ const DEFAULT_REMOTE_AUDIO_URL = "https://www.learningcontainer.com/wp-content/u
  * @param controlPanel
  * @param headerText
  * @param onUploadPressed
- * @param type
+ * @param type 'audio' | 'video'
  * @returns {*}
  * @constructor
  */
@@ -62,53 +61,67 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
 
     /**
      * Select a file from picker and return its full path
-     * @param type
      * @returns {Promise<void>}
      */
-    const getFileFromPicker = async (type = 'video') => {
-        let path;
-        if (type === 'video') {
-            try {
-                const res = await ImagePicker.openPicker({mediaType: type});
-                path = res.path;
-            } catch (err) {return;}
-        } else {
+    const getFileFromPicker = async () => {
+        try {
             // Pick a single file
-            try {
-                const res = await DocumentPicker.pick({
-                    type: [DocumentPicker.types.audio],
-                });
+            const res = await DocumentPicker.pick({
+                type: [DocumentPicker.types[type]],
+            });
 
-                // Create a file to content the selected file since the response is a content resolver
-                const destinationFileFullPath = FS.dirs.CacheDir + '/' + res.name;
-                await FS.cp(res.uri, destinationFileFullPath);
+            // Get information about file in order to have its full path
+            const result = await FS.stat(res.uri);
 
-                path = 'file://' + destinationFileFullPath;
-            } catch (err) {return;}
-        }
+            // Remove ending "/" if present
+            const path = result.path[result.path.length - 1] === '/'
+                ? result.path.substring(0, result.path.length - 1) : result.path;
 
-        // Return the response path
-        onUploadPressed(path);
-        setIsSelectModalVisible(false);
+            // Prepend file protocol in order to be compatible with RNAudioVideoTools
+            const destinationFileFullPath = 'file://' + path;
+
+            // Return the response path
+            onUploadPressed(destinationFileFullPath);
+            setIsSelectModalVisible(false);
+        } catch (err) {}
     };
 
+    /**
+     * Left component on header
+     * @returns {*}
+     */
+    const renderLeftComponent = () => {
+        return (
+            <TouchableOpacity
+                onPress={() => navigation.toggleDrawer()}
+                hitSlop={{top: 20, left: 20, bottom: 20, right: 20}}
+            >
+                <Icon
+                    name='menu'
+                    color={COLORS.White}
+                />
+            </TouchableOpacity>
+        );
+    };
 
+    /**
+     * Right component on header
+     * @returns {*}
+     */
     const renderRightComponent = () => {
         return (
             <Button
+                iconRight
+                title="Select"
                 icon={
                     <Icon
                         name="video-library"
                         type="material"
                         size={15}
-                        color="white"
-                        style={{
-                            marginLeft: 5
-                        }}
+                        color={COLORS.White}
+                        style={{marginLeft: 5}}
                     />
                 }
-                iconRight
-                title="Select"
                 onPress={() => setIsSelectModalVisible(true)}
             />
         );
@@ -117,14 +130,8 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
     return (
         <>
             <Header
-                leftComponent={{
-                    icon: 'menu',
-                    color: '#fff',
-                    onPress: () => {
-                        navigation.toggleDrawer();
-                    }
-                }}
-                centerComponent={{ text: headerText, style: { color: '#fff' } }}
+                leftComponent={renderLeftComponent()}
+                centerComponent={{ text: headerText, style: { color: COLORS.White, fontSize: 18 } }}
                 rightComponent={renderRightComponent()}
             />
             <View style={styles.container}>
@@ -141,7 +148,7 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
                 isVisible={isSelectModalVisible}
                 leftText={"From phone"}
                 rightText={"From url"}
-                onLeftClick={() => getFileFromPicker(type)}
+                onLeftClick={() => getFileFromPicker()}
                 onRightClick={() => getFileFromUrl()}
                 onCloseClick={() => setIsSelectModalVisible(false)}
                 content={(

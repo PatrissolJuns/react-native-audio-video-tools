@@ -20,6 +20,9 @@ const Icon = (props) => (
     />
 );
 
+/**
+ * Custom media player with a permanent display of control buttons and seek bar
+ */
 class MediaPlayer extends Component {
     constructor(props) {
         super(props);
@@ -65,6 +68,15 @@ class MediaPlayer extends Component {
                     : null,
             };
         }
+
+        if (nextProps.paused !== prevState.paused) {
+            return {
+                isFakePlaying: false,
+                isPlaying: nextProps.paused,
+                progress: prevState.progress >= 1 ? 0 : prevState.progress,
+            };
+        }
+
         return null;
     }
 
@@ -209,7 +221,7 @@ class MediaPlayer extends Component {
      */
 
     /**
-     * get seeker bar width
+     * get seek bar width
      */
     onSeekBarLayout = ({ nativeEvent }) => {
         this.seekBarWidth = nativeEvent.layout.width;
@@ -358,6 +370,7 @@ class MediaPlayer extends Component {
             <>
                 <Video
                     {...this.props}
+                    controls={false}
                     ref={p => { this.player = p; }}
                     paused={this.props.paused
                         ? this.props.paused || !this.state.isPlaying
@@ -430,13 +443,13 @@ const styles = StyleSheet.create({
     timeLeft: {
         flex: 1,
         fontSize: 16,
-        color: '#FFFFFF',
+        color: COLORS.White,
         paddingLeft: 10,
     },
     timeRight: {
         flex: 1,
         fontSize: 16,
-        color: '#FFFFFF',
+        color: COLORS.White,
         textAlign: 'right',
         paddingRight: 10,
     },

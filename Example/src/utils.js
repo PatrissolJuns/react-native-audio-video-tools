@@ -85,12 +85,13 @@ const msToTime = (duration) => {
  * @param type
  * @returns {string|*}
  */
-const getExtensionFromMediaTools = (mediaTools, type) => {
-    if (mediaTools && mediaTools.mediaDetails) {
-        return mediaTools.mediaDetails.extension;
+const getExtensionFromMediaTools = async (mediaTools, type) => {
+    if (mediaTools) {
+        const mediaDetails = await mediaTools.getDetails();
+        if (mediaDetails) return mediaDetails.extension;
     }
 
-    return DEFAULT_EXTENSION[type];
+    return DEFAULT_EXTENSION[type.toString().toUpperCase()];
 };
 
 /**
@@ -107,7 +108,7 @@ const getBaseFilename = () => {
  * @param type
  * @returns {string}
  */
-const generatedFileName = (mediaTools, type) => `${Date.now().toString()}.${getExtensionFromMediaTools(mediaTools, type)}`;
+const generatedFileName = async (mediaTools, type) => `${Date.now().toString()}.${await getExtensionFromMediaTools(mediaTools, type)}`;
 
 /**
  * Get percentage

@@ -25,7 +25,6 @@ const SpeedList = {
 
 const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, navigate, progressModal, updateProgressModal}) => {
     const MediaTools = type === 'audio' ? AudioTools : VideoTools;
-    const outputFilePath = `${getBaseFilename()}/compress_${type}_${generatedFileName(mediaTools, type)}`;
 
     const [speed, setSpeed] = useState(SpeedList.veryslow);
     const [quality, setQuality] = useState(QualityList.high);
@@ -33,21 +32,11 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
 
     const showCompressOptions = () => {
         runIfInputFileCorrect(() => {
-            if (type === 'video') {
-                setIsModalVisible(true);
-            } else {
-                compressMedia();
-            }
+            setIsModalVisible(true);
         });
     };
 
     const compressMedia = async () => {
-        const options = {
-            speed,
-            quality,
-            outputFilePath,
-        };
-
         // Hide modal
         setIsModalVisible(false);
 
@@ -65,6 +54,14 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
                 });
             },
         });
+
+        // Get path to store the file
+        const outputFilePath = `${getBaseFilename()}/compressed_${type}_${await generatedFileName(mediaTools, type)}`;
+
+        const options = {quality, outputFilePath};
+        if (type === 'video') {
+            options.speed = speed;
+        }
 
         try {
             // Launch compression
@@ -101,7 +98,7 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
         });
     };
 
-    const media = type === 'video' ? 'Video' : 'Audio';
+    const media = type === 'audio' ? 'Audio' : 'Video';
 
     return (
         <>
@@ -122,7 +119,7 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
                     <View style={{}}>
                         <Text>Please select options or leave default one</Text>
                         <View style={styles.lisItemContainer}>
-                            <Text style={{fontWeight: 'bold',}}>Quality:</Text>
+                            <Text style={{fontWeight: 'bold'}}>Quality:</Text>
                             <DropDownPicker
                                 items={Object.values(QualityList).map(i => ({label: i, value: i}))}
                                 defaultValue={quality}
@@ -133,25 +130,29 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
                                 onChangeItem={item => setQuality(item.value)}
                             />
                         </View>
-                        <View style={styles.lisItemContainer}>
-                            <Text style={{fontWeight: 'bold',}}>Speed:</Text>
-                            <DropDownPicker
-                                items={Object.values(SpeedList).map(i => ({label: i, value: i}))}
-                                defaultValue={speed}
-                                containerStyle={{height: 40, flex: 0.7}}
-                                style={{backgroundColor: '#fafafa'}}
-                                itemStyle={{justifyContent: 'flex-start'}}
-                                dropDownStyle={{backgroundColor: '#fafafa'}}
-                                onChangeItem={item => setSpeed(item.value)}
-                            />
-                        </View>
-                        <View style={styles.lisItemContainer}>
-                            <Icon name={'info-circle'} type="font-awesome-5"/>
-                            <Text style={styles.infoText}>
-                                The higher the speed, the less effective the compression is and
-                                can in some cases lead to an <Text style={{fontWeight: 'bold'}}>opposite effect</Text>.
-                            </Text>
-                        </View>
+                        {type === 'video' && (
+                            <View style={styles.lisItemContainer}>
+                                <Text style={{fontWeight: 'bold',}}>Speed:</Text>
+                                <DropDownPicker
+                                    items={Object.values(SpeedList).map(i => ({label: i, value: i}))}
+                                    defaultValue={speed}
+                                    containerStyle={{height: 40, flex: 0.7}}
+                                    style={{backgroundColor: '#fafafa'}}
+                                    itemStyle={{justifyContent: 'flex-start'}}
+                                    dropDownStyle={{backgroundColor: '#fafafa'}}
+                                    onChangeItem={item => setSpeed(item.value)}
+                                />
+                            </View>
+                        )}
+                        {type === 'video' && (
+                            <View style={styles.lisItemContainer}>
+                                <Icon name={'info-circle'} type="font-awesome-5"/>
+                                <Text style={styles.infoText}>
+                                    The higher the speed, the less effective the compression is and
+                                    can in some cases lead to an <Text style={{fontWeight: 'bold'}}>opposite effect</Text>.
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 )}
             />

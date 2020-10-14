@@ -15,7 +15,6 @@ import {COLORS, generatedFileName, getBaseFilename, ROUTES} from "../utils";
 class ConvertMediaOperation extends Component {
     constructor(props) {
         super(props);
-        this.outputFilePath = `${getBaseFilename()}/convert_${this.props.type}_${generatedFileName(this.props.videoTools, this.props.type)}`;
 
         this.state = {
             isModalVisible: false,
@@ -31,7 +30,7 @@ class ConvertMediaOperation extends Component {
         });
     };
 
-    convertMedia = () => {
+    convertMedia = async () => {
         // Hide modal
         this.setState({
             isModalVisible: false,
@@ -53,10 +52,12 @@ class ConvertMediaOperation extends Component {
             },
         });
 
+        const outputFilePath = `${getBaseFilename()}/converted_${this.props.type}_${await generatedFileName(this.props.videoTools, this.props.type)}`;
+
         this.props
             .mediaTools
             .convertTo({
-                outputPath: this.outputFilePath,
+                outputFilePath,
                 extension: this.state.newExtension,
             })
             .then(async result => {
@@ -89,7 +90,7 @@ class ConvertMediaOperation extends Component {
     };
 
     render() {
-        const media = this.props.type === 'video' ? 'Video' : 'Audio';
+        const media = this.props.type === 'audio' ? 'Audio' : 'Video';
         return (
             <>
                 <ControlPanelItem
@@ -129,15 +130,17 @@ class ConvertMediaOperation extends Component {
 
 const extensionListToConvertTo = {
     video: {
-        'mp4': 'mp4',
-        'mkv': 'mkv',
         'avi': 'avi',
+        'mkv': 'mkv',
+        'mp4': 'mp4',
+        '3gp': '3gp',
+        'webm': 'webm',
     },
     audio: {
+        'aac': 'aac',
         'mp3': 'mp3',
         'm4a': 'm4a',
         'wav': 'wav',
-        'aac': 'aac',
         'ogg': 'ogg',
         'flac': 'flac',
     }

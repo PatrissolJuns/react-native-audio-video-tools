@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import Video from "react-native-video";
 import RNFetchBlob from 'rn-fetch-blob';
+import MediaPlayer from "./components/MediaPlayer";
 import {Button, Header, Icon, ListItem} from "react-native-elements";
 import {PermissionsAndroid, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 
@@ -191,12 +191,31 @@ const Result = (props) => {
     };
 
     /**
+     * Left component on header
+     * @returns {*}
+     */
+    const renderLeftComponent = () => {
+        return (
+            <TouchableOpacity
+                onPress={() => props.navigation.goBack()}
+                hitSlop={{top: 20, left: 20, bottom: 20, right: 20}}
+            >
+                <Icon
+                    name='arrowleft'
+                    type="antdesign"
+                    color={COLORS.White}
+                />
+            </TouchableOpacity>
+        );
+    };
+
+    /**
      * Right component on header
      * @returns {*}
      */
     const renderRightComponent = () => {
-        // Hide download button while downloading
-        if (isDownloading) {
+        // Hide download button while downloading or when result is a text instead
+        if (isDownloading || type === 'text') {
             return <View />
         }
 
@@ -217,25 +236,6 @@ const Result = (props) => {
                 title="Download"
                 onPress={handleDownload}
             />
-        );
-    };
-
-    /**
-     * Left component on header
-     * @returns {*}
-     */
-    const renderLeftComponent = () => {
-        return (
-            <TouchableOpacity
-                style={{padding: 5}}
-                onPress={() => props.navigation.goBack()}
-            >
-                <Icon
-                    name='arrowleft'
-                    type="antdesign"
-                    color={COLORS.White}
-                />
-            </TouchableOpacity>
         );
     };
 
@@ -268,8 +268,7 @@ const Result = (props) => {
                 </ScrollView>
             ) : (
                 <View style={styles.container}>
-                    <Video
-                        controls
+                    <MediaPlayer
                         style={styles.video}
                         resizeMode={'contain'}
                         source={{uri: content.url}}
