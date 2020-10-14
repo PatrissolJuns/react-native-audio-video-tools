@@ -23,25 +23,29 @@ declare module "react-native-audio-video-tools" {
         MEDIUM = 'medium',
     }
 
-    type CompressVideo = {
-        speed?: Preset;
-        bitrate?: string;
-        quality?: Quality;
-        outputFilePath?: string;
-    }
-
-    type DefaultParameters = {
+    export type MediaDefaultParameters = {
         extension?: string;
         outputFilePath?: string;
     }
 
-    type Cut = {
+    export type CompressVideo = {
+        speed?: Preset;
+        bitrate?: string;
+        quality?: Quality;
+    } & MediaDefaultParameters;
+
+    export type CompressAudio = {
+        bitrate?: string;
+        quality?: Quality;
+    } & MediaDefaultParameters;
+
+    export type CutMedia = {
         to: string;
         from: string;
         outputFilePath?: string;
-    }
+    };
 
-    type CorrectInputFile = {
+    export type CorrectInputFile = {
         isCorrect: boolean;
         message: string;
     }
@@ -57,12 +61,11 @@ declare module "react-native-audio-video-tools" {
 
     export type MediaDetails = MediaInformation & AnotherMediaInformation;
 
-    type DefaultResponse = Promise<{rc: number, outputFilePath: string}>;
+    export type MediaDefaultResponse = Promise<{rc: number, outputFilePath: string}>;
 
     class Media {
         // Property
         isRemoteMedia: null | boolean;
-        mediaDetails: null | MediaDetails;
 
         /**
          * Update media input file with a full path
@@ -74,22 +77,22 @@ declare module "react-native-audio-video-tools" {
          * Return object including error message in case input file is incorrect
          * @returns {{message: string, isCorrect: boolean}}
          */
-        isInputFileCorrect: () => CorrectInputFile;
+        isInputFileCorrect: () => Promise<CorrectInputFile>;
 
         /**
          * Retrieve details about a video file
          */
-        getDetails:(force: boolean) => Promise<MediaDetails>;
+        getDetails: (force: boolean) => Promise<MediaDetails | any>;
 
         /**
          * Convert a video to another extension
          */
-        convertTo: (options: DefaultParameters) => DefaultResponse;
+        convertTo: (options: MediaDefaultParameters) => MediaDefaultResponse;
 
         /**
          * Cut video
          */
-        cut: (options: Cut) => DefaultResponse;
+        cut: (options: CutMedia) => MediaDefaultResponse;
 
         /**
          * Run a command
@@ -106,14 +109,18 @@ declare module "react-native-audio-video-tools" {
         /**
          * Compress video
          */
-        compress: (options: CompressVideo) => DefaultResponse;
+        compress: (options: CompressVideo) => MediaDefaultResponse;
 
         /**
          * Extract audio from video
          */
-        extractAudio: (options: DefaultParameters) => DefaultResponse;
+        extractAudio: (options: MediaDefaultParameters) => MediaDefaultResponse;
     }
 
     export class AudioTools extends Media {
+        /**
+         * Compress video
+         */
+        compress: (options: CompressAudio) => MediaDefaultResponse;
     }
 }

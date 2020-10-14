@@ -46,10 +46,6 @@ const isFileNameError = (filename) => {
     return filename === INCORRECT_INPUT_PATH;
 };
 
-const isLocaleMedia = path => {
-    return path.split(':/')[0].includes('http');
-};
-
 /**
  * Extract full file name (with extension) from file path or url
  * @param path
@@ -173,15 +169,14 @@ const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
                 options.extension = options.extension.replace(/^\.?(\w+)$/, '$1');
 
                 // Check if extension is correct according to extension list
-                const extensionList = mediaType === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
-                if (!extensionList.includes(options.extension)) {
+                if (!isMediaExtensionCorrect(options.extension, mediaType)) {
+                    const extensionList = mediaType === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
                     return {
                         isCorrect: false,
                         message: `Unknown extension ${options.extension}. Please provide one of [` +
                             extensionList.map(item => `"${item}"`).join(', ') + ']'
                     };
                 }
-
             } else {
                 return {
                     isCorrect: false,

@@ -12,10 +12,8 @@ import {
 } from "./utils";
 import {
     INCORRECT_OUTPUT_PATH,
-    DEFAULT_VIDEO_CONVERT_TO_OPTIONS,
-    DEFAULT_AUDIO_CONVERT_TO_OPTIONS,
     ERROR_WHILE_GETTING_INPUT_DETAILS,
-    ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE
+    ERROR_OCCUR_WHILE_GENERATING_OUTPUT_FILE,
 } from './constants';
 
 /**
@@ -244,10 +242,14 @@ export default class Media {
      * @param options
      * @returns {Promise<any>}
      */
-    convertTo = (options = (this.mediaType === 'audio'
-        ? DEFAULT_AUDIO_CONVERT_TO_OPTIONS
-        : DEFAULT_VIDEO_CONVERT_TO_OPTIONS)) => {
+    convertTo = (options) => {
         return new Promise(async (resolve, reject) => {
+            // Check if extension is present before continue
+            if (options.extension === undefined) {
+                reject(`Parameter extension should be set`);
+                return;
+            }
+
             // Check input and options values
             const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'convertTo', options.extension);
             if (!checkInputAndOptionsResult.isCorrect) {
@@ -255,13 +257,16 @@ export default class Media {
                 return;
             }
 
-            // get resulting output file path
-            const { outputFilePath } = checkInputAndOptionsResult;
+            // Get resulting output file path
+            let { outputFilePath } = checkInputAndOptionsResult;
 
-            // construct final command
+            // Replace outputFilePath's extension by the given one
+            outputFilePath = outputFilePath.toString().replace(/\.\w+$/, '.' + options.extension);
+
+            // Set command
             const cmd = `-i "${this.mediaFullPath}" "${outputFilePath}"`;
 
-            // execute command
+            // Execute command
             Media
                 .execute(cmd)
                 .then(result => resolve({outputFilePath, rc: result}))

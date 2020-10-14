@@ -16,6 +16,7 @@ const DEFAULT_COMPRESS_VIDEO_OPTIONS = {
 
 const DEFAULT_COMPRESS_AUDIO_OPTIONS = {
     bitrate: '96k',
+    quality: QUALITY.MEDIUM,
 };
 
 const DEFAULT_AUDIO_EXTENSION = 'mp3';

@@ -7,6 +7,9 @@ import {
     DEFAULT_EXTRACT_AUDIO_OPTIONS
 } from '../constants';
 
+/**
+ * Management of operations relating to video processing
+ */
 class VideoTools extends Media {
     constructor(videoFullPath) {
         super(videoFullPath, 'video');
@@ -20,7 +23,7 @@ class VideoTools extends Media {
     compress = (options = DEFAULT_COMPRESS_VIDEO_OPTIONS) => {
         return new Promise(async (resolve, reject) => {
             // Check input and options values
-            const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'compress');
+            const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'compress', options.extension);
             if (!checkInputAndOptionsResult.isCorrect) {
                 reject(checkInputAndOptionsResult.message);
                 return;
@@ -33,25 +36,24 @@ class VideoTools extends Media {
             const result = getCompressionOptionsResolution(options.quality);
 
             // group command from calculated values
-            const commandObject = {
-                "-i": this.mediaFullPath,
-                "-c:v": "libx264",
-                "-crf": result["-crf"],
-                "-preset": options.speed ? options.speed : DEFAULT_COMPRESS_VIDEO_OPTIONS.speed,
-            };
-            if (options.bitrate) commandObject['bitrate'] = options.bitrate;
+            const cmd = [
+                "-i", `"${this.mediaFullPath}"`,
+                "-c:v", "libx264",
+                "-crf", result["-crf"],
+            ];
 
-            // construct final command
-            const cmd = [];
-            Object.entries(commandObject).map(item => {
-                cmd.push(item[0]);
-                cmd.push(item[1]);
-            });
+            // Add bitrate if present
+            if (options.bitrate) {
+                cmd.push("-b:v", options.bitrate);
+            }
 
-            // add output file as last parameters
-            cmd.push(outputFilePath);
+            // Add preset
+            cmd.push("-preset", options.speed ? options.speed : DEFAULT_COMPRESS_VIDEO_OPTIONS.speed);
 
-            // execute command
+            // Add output file as last parameter
+            cmd.push(`"${outputFilePath}"`);
+
+            // Execute command
             VideoTools
                 .execute(cmd.join(' '))
                 .then(result => resolve({outputFilePath, rc: result}))

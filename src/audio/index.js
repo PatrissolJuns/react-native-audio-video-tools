@@ -32,7 +32,7 @@ class AudioTools extends Media {
             // Initialize bitrate
             let bitrate = DEFAULT_COMPRESS_AUDIO_OPTIONS.bitrate;
 
-            if (mediaDetails) {
+            if (mediaDetails && mediaDetails.bitrate) {
                 // Check and return the appropriate bitrate according to quality expected
                 for (let i = 0; i < AUDIO_BITRATE.length; i++) {
                     // Check a particular bitrate to return its nearest lower according to quality
