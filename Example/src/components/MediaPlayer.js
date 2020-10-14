@@ -20,7 +20,7 @@ const Icon = (props) => (
     />
 );
 
-class VideoPlayer extends Component {
+class MediaPlayer extends Component {
     constructor(props) {
         super(props);
 
@@ -442,15 +442,15 @@ const styles = StyleSheet.create({
     },
 });
 
-VideoPlayer.propTypes = {
+MediaPlayer.propTypes = {
     ...Video.propTypes,
     autoplay: PropTypes.bool,
     loop: PropTypes.bool,
 };
 
-VideoPlayer.defaultProps = {
+MediaPlayer.defaultProps = {
     loop: true,
     autoplay: true,
 };
 
-export default VideoPlayer;
+export default MediaPlayer;

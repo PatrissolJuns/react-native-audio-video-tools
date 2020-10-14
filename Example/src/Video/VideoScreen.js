@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import Layout from "../components/Layout";
-import VideoPlayer from "../components/VideoPlayer";
+import MediaPlayerWrapper from "../components/MediaPlayerWrapper";
 import VideoControlPanel from "./VideoControlPanel";
 
 /**
@@ -20,7 +20,7 @@ const VideoScreen = (props) => {
             headerText={"Video"}
             onUploadPressed={file => setVideoSource(file)}
             viewContent={(
-                <VideoPlayer
+                <MediaPlayerWrapper
                     source={videoSource}
                 />
             )}
