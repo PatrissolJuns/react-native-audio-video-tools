@@ -10,6 +10,7 @@ import ControlPanelItem from "../components/ControlPanelItem";
 import ConvertMediaOperation from "../Media/ConvertMediaOperation";
 import MediaDetailsOperation from "../Media/MediaDetailsOperation";
 import CompressMediaOperation from "../Media/CompressMediaOperation";
+import AdjustVolumeOperation from "../Media/AdjustVolumeOperation";
 
 /**
  * Set of controls button to handle various action on audio
@@ -103,10 +104,13 @@ class AudioControlPanel extends Component {
                             updateProgressModal={this.updateProgressModal}
                             runIfInputFileCorrect={this.runIfInputFileCorrect}
                         />
-                        <ControlPanelItem
-                            text={"Add Poster"}
-                            // onPress={this.onExtractAudioPressed}
-                            bgColor={COLORS["Medium Slate Blue"]}
+                        <AdjustVolumeOperation
+                            type={'audio'}
+                            mediaTools={this.state.audioTools}
+                            progressModal={this.state.progressModal}
+                            navigate={this.props.navigation.navigate}
+                            updateProgressModal={this.updateProgressModal}
+                            runIfInputFileCorrect={this.runIfInputFileCorrect}
                         />
                     </View>
 

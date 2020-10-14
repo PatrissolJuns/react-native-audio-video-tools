@@ -102,7 +102,7 @@ class VideoControlPanel extends Component {
                             mediaDetails: mediaDetails,
                             newMediaDetails: newMediaDetails,
                         },
-                        type: 'video',
+                        type: 'media',
                     });
                 })
                 .catch(error => toast.error(error ? error.toString() : error))

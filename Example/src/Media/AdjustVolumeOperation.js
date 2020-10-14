@@ -10,19 +10,19 @@ import ControlPanelItem from "../components/ControlPanelItem";
 import {COLORS, generatedFileName, getBaseFilename, ROUTES} from "../utils";
 
 /**
- * Convert a media from one format to another
+ * Adjust the volume of an audio
  */
-class ConvertMediaOperation extends Component {
+class AdjustVolumeOperation extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             isModalVisible: false,
-            newExtension: this.props.type === 'audio' ? extensionListToConvertTo.audio.mp3 : extensionListToConvertTo.video.mp4
+            action: Action.increase
         }
     }
 
-    handleOnConvertToPress = () => {
+    handleOnAdjustVolume = () => {
         this.props.runIfInputFileCorrect(() => {
             this.setState({
                 isModalVisible: true,
@@ -30,7 +30,7 @@ class ConvertMediaOperation extends Component {
         });
     };
 
-    convertMedia = async () => {
+    adjustVolume = async () => {
         // Hide modal
         this.setState({
             isModalVisible: false,
@@ -40,7 +40,7 @@ class ConvertMediaOperation extends Component {
         this.props.updateProgressModal({
             isVisible: true,
             btnText: 'Cancel',
-            text: 'Converting...',
+            text: 'Executing...',
             onBtnText: () => {
                 const MediaTools = this.props.type === 'audio' ? AudioTools : VideoTools;
                 MediaTools.cancel();
@@ -52,13 +52,15 @@ class ConvertMediaOperation extends Component {
             },
         });
 
-        const outputFilePath = `${getBaseFilename()}/converted_${this.props.type}_${await generatedFileName(this.props.videoTools, this.props.type)}`;
+        const outputFilePath = `${getBaseFilename()}/adjusted_volume_${this.props.type}_${await generatedFileName(this.props.videoTools, this.props.type)}`;
+
+        const rate = this.state.action === Action.increase ? 1.5 : 0.5;
 
         this.props
             .mediaTools
-            .convertTo({
+            .adjustVolume({
+                rate,
                 outputFilePath,
-                extension: this.state.newExtension,
             })
             .then(async result => {
                 const compressedMediaTools = this.props.type === 'audio'
@@ -94,30 +96,30 @@ class ConvertMediaOperation extends Component {
         return (
             <>
                 <ControlPanelItem
-                    bgColor={COLORS.Haiti}
-                    text={`Convert ${media}`}
-                    onPress={this.handleOnConvertToPress}
+                    bgColor={COLORS["Medium Slate Blue"]}
+                    text={`Adjust Volume`}
+                    onPress={this.handleOnAdjustVolume}
                 />
                 <CustomModal
-                    title={`${media} Converting`}
+                    title={`${media} volume adjusting`}
                     isVisible={this.state.isModalVisible}
                     rightText={"Start"}
                     leftText={"Cancel"}
                     onLeftClick={() => this.setState({isModalVisible: false})}
                     onCloseClick={() => this.setState({isModalVisible: false})}
-                    onRightClick={this.convertMedia}
+                    onRightClick={this.adjustVolume}
                     content={(
                         <View style={{}}>
-                            <Text>Please select extension to convert to or leave default one</Text>
+                            <Text>Please select action to perform or leave default one</Text>
                             <View style={styles.lisItemContainer}>
                                 <DropDownPicker
-                                    items={Object.values(extensionListToConvertTo[this.props.type]).map(i => ({label: i, value: i}))}
-                                    defaultValue={this.state.newExtension}
+                                    items={Object.values(Action).map(i => ({label: i, value: i}))}
+                                    defaultValue={this.state.action}
                                     containerStyle={{height: 40, flex: 0.7}}
                                     style={{backgroundColor: '#fafafa'}}
                                     itemStyle={{justifyContent: 'flex-start'}}
                                     dropDownStyle={{backgroundColor: '#fafafa'}}
-                                    onChangeItem={item => this.setState({newExtension: item.value})}
+                                    onChangeItem={item => this.setState({action: item.value})}
                                 />
                             </View>
                         </View>
@@ -128,22 +130,9 @@ class ConvertMediaOperation extends Component {
     }
 }
 
-const extensionListToConvertTo = {
-    video: {
-        'avi': 'avi',
-        'mkv': 'mkv',
-        'mp4': 'mp4',
-        '3gp': '3gp',
-        'webm': 'webm',
-    },
-    audio: {
-        'aac': 'aac',
-        'mp3': 'mp3',
-        'm4a': 'm4a',
-        'wav': 'wav',
-        'ogg': 'ogg',
-        'flac': 'flac',
-    }
+const Action = {
+    'increase': 'Increase',
+    'decrease': 'Decrease',
 };
 
 const styles = StyleSheet.create({
@@ -166,7 +155,7 @@ const styles = StyleSheet.create({
     },
 });
 
-ConvertMediaOperation.propTypes = {
+AdjustVolumeOperation.propTypes = {
     type: PropTypes.string,
     navigate: PropTypes.any,
     mediaTools: PropTypes.any,
@@ -175,4 +164,4 @@ ConvertMediaOperation.propTypes = {
     runIfInputFileCorrect: PropTypes.func.isRequired,
 };
 
-export default ConvertMediaOperation;
+export default AdjustVolumeOperation;
