@@ -158,6 +158,38 @@ const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
             }
         }
 
+        if (options.extension) {
+            // Check if the type of extension is correct
+            if (typeof options.extension !== 'string') {
+                return {
+                    isCorrect: false,
+                    message: `Parameter force should be string. ${typeof options.extension} given`
+                };
+            }
+
+            // Check if extension follows this pattern '.extension' or 'extension'
+            if (/^\.?\w+$/.test(options.extension)) {
+                // Remove the dot if the present
+                options.extension = options.extension.replace(/^\.?(\w+)$/, '$1');
+
+                // Check if extension is correct according to extension list
+                const extensionList = mediaType === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
+                if (!extensionList.includes(options.extension)) {
+                    return {
+                        isCorrect: false,
+                        message: `Unknown extension ${options.extension}. Please provide one of [` +
+                            extensionList.map(item => `"${item}"`).join(', ') + ']'
+                    };
+                }
+
+            } else {
+                return {
+                    isCorrect: false,
+                    message: `Malformed extension. Found ${options.extension} instead of this pattern: '.extension' or 'extension'`
+                };
+            }
+        }
+
         switch (operation) {
             case 'compress':
                 if (mediaType === 'video') {
