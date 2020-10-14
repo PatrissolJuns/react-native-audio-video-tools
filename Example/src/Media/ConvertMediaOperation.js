@@ -9,20 +9,6 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import ControlPanelItem from "../components/ControlPanelItem";
 import {COLORS, generatedFileName, getBaseFilename, ROUTES} from "../utils";
 
-const ConvertToList = {
-    video: {
-        'mp4': 'mp4',
-        'mkv': 'mkv',
-        'avi': 'avi',
-    },
-    audio: {
-        'mp3': 'mp3',
-        'm4a': 'm4a',
-        'wav': 'wav',
-        'aac': 'aac',
-    }
-};
-
 /**
  * Convert a media from one format to another
  */
@@ -33,11 +19,11 @@ class ConvertMediaOperation extends Component {
 
         this.state = {
             isModalVisible: false,
-            newExtension: this.props.type === 'audio' ? ConvertToList.audio.mp3 : ConvertToList.video.mp4
+            newExtension: this.props.type === 'audio' ? extensionListToConvertTo.audio.mp3 : extensionListToConvertTo.video.mp4
         }
     }
 
-    handleOnConvertToPressed = () => {
+    handleOnConvertToPress = () => {
         this.props.runIfInputFileCorrect(() => {
             this.setState({
                 isModalVisible: true,
@@ -103,15 +89,16 @@ class ConvertMediaOperation extends Component {
     };
 
     render() {
+        const media = this.props.type === 'video' ? 'Video' : 'Audio';
         return (
             <>
                 <ControlPanelItem
                     bgColor={COLORS.Haiti}
-                    text={`Convert ${this.props.type === 'video' ? 'Video' : 'Audio'}`}
-                    onPress={this.handleOnConvertToPressed}
+                    text={`Convert ${media}`}
+                    onPress={this.handleOnConvertToPress}
                 />
                 <CustomModal
-                    title={`${this.props.type === 'video' ? 'Video' : 'Audio'} Converting`}
+                    title={`${media} Converting`}
                     isVisible={this.state.isModalVisible}
                     rightText={"Start"}
                     leftText={"Cancel"}
@@ -123,7 +110,7 @@ class ConvertMediaOperation extends Component {
                             <Text>Please select extension to convert to or leave default one</Text>
                             <View style={styles.lisItemContainer}>
                                 <DropDownPicker
-                                    items={Object.values(ConvertToList[this.props.type]).map(i => ({label: i, value: i}))}
+                                    items={Object.values(extensionListToConvertTo[this.props.type]).map(i => ({label: i, value: i}))}
                                     defaultValue={this.state.newExtension}
                                     containerStyle={{height: 40, flex: 0.7}}
                                     style={{backgroundColor: '#fafafa'}}
@@ -139,6 +126,22 @@ class ConvertMediaOperation extends Component {
         );
     }
 }
+
+const extensionListToConvertTo = {
+    video: {
+        'mp4': 'mp4',
+        'mkv': 'mkv',
+        'avi': 'avi',
+    },
+    audio: {
+        'mp3': 'mp3',
+        'm4a': 'm4a',
+        'wav': 'wav',
+        'aac': 'aac',
+        'ogg': 'ogg',
+        'flac': 'flac',
+    }
+};
 
 const styles = StyleSheet.create({
     lisItemContainer: {

@@ -101,15 +101,17 @@ const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, naviga
         });
     };
 
+    const media = type === 'video' ? 'Video' : 'Audio';
+
     return (
         <>
             <ControlPanelItem
                 bgColor={COLORS.Jade}
-                text={"Compress Video"}
+                text={`Compress ${media}`}
                 onPress={showCompressOptions}
             />
             <CustomModal
-                title={"Video Compression"}
+                title={`${media} Compression`}
                 isVisible={isModalVisible}
                 rightText={"Start"}
                 leftText={"Cancel"}
