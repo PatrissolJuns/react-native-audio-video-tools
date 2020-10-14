@@ -23,7 +23,7 @@ class AudioTools extends Media {
                 return;
             }
 
-            // get resulting output file path
+            // Get resulting output file path
             const { outputFilePath } = checkInputAndOptionsResult;
 
             // Get media details
@@ -71,6 +71,40 @@ class AudioTools extends Media {
                 .catch(error => reject(error));
         });
     };
+
+    /**
+     * Adjust volume of an audio
+     * @param options
+     * @returns {Promise<any>}
+     */
+    adjustVolume = (options) => {
+        return new Promise(async (resolve, reject) => {
+            // Check if extension is present before continue
+            if (options.rate === undefined) {
+                reject(`Parameter rate should be set`);
+                return;
+            }
+
+            // Check input and options values
+            const checkInputAndOptionsResult = await this.checkInputAndOptions(options, 'adjustVolume');
+            if (!checkInputAndOptionsResult.isCorrect) {
+                reject(checkInputAndOptionsResult.message);
+                return;
+            }
+
+            // Get resulting output file path
+            const { outputFilePath } = checkInputAndOptionsResult;
+
+            // group command from calculated values
+            const cmd = `-i "${this.mediaFullPath}" -filter:a "volume=${options.rate}" "${outputFilePath}"`;
+
+            // Execute command
+            AudioTools
+                .execute(cmd)
+                .then(result => resolve({outputFilePath, rc: result}))
+                .catch(error => reject(error));
+        });
+    }
 }
 
 export default AudioTools;

@@ -28,6 +28,10 @@ declare module "react-native-audio-video-tools" {
         outputFilePath?: string;
     }
 
+    export type AdjustVolume = {
+        rate: number;
+    } & MediaDefaultParameters;
+
     export type CompressVideo = {
         speed?: Preset;
         bitrate?: string;
@@ -38,6 +42,11 @@ declare module "react-native-audio-video-tools" {
         bitrate?: string;
         quality?: Quality;
     } & MediaDefaultParameters;
+
+    export type ConvertTo = {
+        extension: string;
+        outputFilePath?: string;
+    }
 
     export type CutMedia = {
         to: string;
@@ -87,7 +96,7 @@ declare module "react-native-audio-video-tools" {
         /**
          * Convert a video to another extension
          */
-        convertTo: (options: MediaDefaultParameters) => MediaDefaultResponse;
+        convertTo: (options: ConvertTo) => MediaDefaultResponse;
 
         /**
          * Cut video
@@ -119,8 +128,13 @@ declare module "react-native-audio-video-tools" {
 
     export class AudioTools extends Media {
         /**
-         * Compress video
+         * Compress an audio
          */
         compress: (options: CompressAudio) => MediaDefaultResponse;
+
+        /**
+         * Adjust volume of an audio
+         */
+        adjustVolume: (options: AdjustVolume) => MediaDefaultResponse;
     }
 }

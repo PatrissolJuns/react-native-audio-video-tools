@@ -159,7 +159,7 @@ const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
             if (typeof options.extension !== 'string') {
                 return {
                     isCorrect: false,
-                    message: `Parameter force should be string. ${typeof options.extension} given`
+                    message: `Parameter force should be a string. ${typeof options.extension} given`
                 };
             }
 
@@ -219,6 +219,22 @@ const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
                         message: 'Incorrect option "to". Please provide a valid one matching hh:mm:ss'
                     };
                 }
+                break;
+            case 'adjustVolume':
+                if (typeof options.rate !== 'number') {
+                    return {
+                        isCorrect: false,
+                        message: `Parameter rate should be a number. ${typeof options.rate} given`
+                    };
+                }
+
+                if (options.rate < 0) {
+                    return {
+                        isCorrect: false,
+                        message: `Parameter rate should be greater than or equal 0. Found ${typeof options.rate}`
+                    };
+                }
+
                 break;
             default: return {
                 isCorrect: true,
