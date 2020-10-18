@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Video from "react-native-video";
+import {ProgressModal} from "./Modals";
 import {Icon as IconNative} from "react-native-elements";
 import {COLORS, msToTime, PRIMARY_COLOR} from "../utils";
 import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
@@ -36,6 +37,11 @@ class MediaPlayer extends Component {
 
             // used to event play/pause icon to toggle went user press seek bar
             isFakePlaying: false,
+
+            progressModal: {
+                isVisible: false,
+                text: 'Loading...',
+            }
         };
 
         this.seekBarWidth = 200;
@@ -93,7 +99,12 @@ class MediaPlayer extends Component {
             this.setState(prevState => ({
                 progress: newProgress,
                 isPlaying: newProgress === 1 ? false : prevState.isPlaying,
-            }));
+            }), () => {
+                // Check if the video has finished playing and should loop
+                if (this.state.progress >= 1 && this.props.loop) {
+                    this.performReplayAction();
+                }
+            });
         }, 1000);
         this.isProgressIntervalOn = true;
     };
@@ -106,13 +117,18 @@ class MediaPlayer extends Component {
     handlePausePlay = (force = false, value = true) => {
         this.setState(prevState => {
             if (prevState.progress >= 1 && !prevState.isPlaying) {
-                this.performReplayAction();
                 return prevState;
             }
 
             return {
                 isPlaying: force ? value : !prevState.isPlaying,
                 progress: prevState.progress >= 1 ? 0 : prevState.progress,
+            }
+        }, () => {
+            // Check if the video has finished playing and it was on pause before pressed on play/pause button
+            // therefore replay it
+            if (this.state.progress >= 1 && !this.state.isPlaying) {
+                this.performReplayAction();
             }
         });
     };
@@ -173,11 +189,14 @@ class MediaPlayer extends Component {
      |
      | This section contains all events of video
      */
-    onLoad = (event) => {
-        if (this.props.onLoad) {
-            this.props.onLoad(event);
+    onLoadStart = () => {
+        // Only show progress modal when dealing with remote media
+        if (this.state.source && this.state.source.uri.includes('http')) {
+            this.setState(prevState => ({progressModal: {...prevState.progressModal, isVisible: true}}));
         }
+    };
 
+    onLoad = (event) => {
         const { duration } = event;
 
         // Get time to add on each interval call
@@ -192,7 +211,7 @@ class MediaPlayer extends Component {
                     ? 5
                     : 2;
 
-        this.setState({ duration });
+        this.setState(prevState => ({duration, progressModal: {...prevState.progressModal, isVisible: false}}) );
     };
 
     onEnd = (event) => {
@@ -208,7 +227,7 @@ class MediaPlayer extends Component {
                 () => this.player && this.performSeekAction(0)
             );
         } else {
-            this.performSeekAction(0);
+            this.performReplayAction();
         }
     };
 
@@ -377,8 +396,13 @@ class MediaPlayer extends Component {
                         : !this.state.isPlaying}
                     onEnd={this.onEnd}
                     onLoad={this.onLoad}
+                    onLoadStart={this.onLoadStart}
                 />
                 {this.renderControls()}
+                <ProgressModal
+                    text={this.state.progressModal.text}
+                    isVisible={this.state.progressModal.isVisible}
+                />
             </>
         );
     }
@@ -462,8 +486,8 @@ MediaPlayer.propTypes = {
 };
 
 MediaPlayer.defaultProps = {
-    loop: true,
+    loop: false,
     autoplay: true,
 };
 
-export default MediaPlayer;
+export default React.memo(MediaPlayer);
