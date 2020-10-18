@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import RNFetchBlob from "rn-fetch-blob";
 import DocumentPicker from 'react-native-document-picker';
 import {Button, Header, Icon, Input} from "react-native-elements";
-import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {PermissionsAndroid, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 
 import toast from "../toast";
 import {CustomModal} from "./Modals";
-import {COLORS, isValidUrl, PRIMARY_COLOR} from "../utils";
+import {askPermission, COLORS, isValidUrl, PRIMARY_COLOR} from "../utils";
 
 const FS = RNFetchBlob.fs;
 const DEFAULT_REMOTE_VIDEO_URL = "http://techslides.com/demos/sample-videos/small.mp4";
@@ -60,11 +60,47 @@ const Layout = ({navigation, viewContent, controlPanel, headerText, onUploadPres
     };
 
     /**
+     * Ask permission to perform operation on file file
+     * @returns {Promise<null|boolean>}
+     */
+    const isFilePermissionGranted = async () => {
+        try {
+            const readPermission = await askPermission(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                "RNAudioVideoTools App Read Permission",
+                "In order to save your media, We need permission to access your phone folder"
+            );
+            const writePermission = await askPermission(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                "RNAudioVideoTools App Write Permission",
+                "In order to save your media, We need permission to access your phone folder"
+            );
+            return readPermission === PermissionsAndroid.RESULTS.GRANTED
+                && writePermission === PermissionsAndroid.RESULTS.GRANTED;
+        } catch (err) {
+            return null;
+        }
+    };
+
+    /**
      * Select a file from picker and return its full path
      * @returns {Promise<void>}
      */
     const getFileFromPicker = async () => {
         try {
+
+            // Ask permission to access file
+            const _isFilePermissionGranted = await isFilePermissionGranted();
+
+            // The following line is NOT a mistake
+            if (_isFilePermissionGranted === false) {
+                toast.error("You need to grant permission in order to continue");
+                return;
+            } else if (_isFilePermissionGranted === null) {
+                toast.error("An error occur asking permission. Please try again later");
+                return;
+            }
+
             // Pick a single file
             const res = await DocumentPicker.pick({
                 type: [DocumentPicker.types[type]],
