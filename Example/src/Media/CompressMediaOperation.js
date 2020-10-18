@@ -11,23 +11,13 @@ import {COLORS, generatedFileName, getBaseFilename, ROUTES} from "../utils";
 import ControlPanelItem from "../components/ControlPanelItem";
 
 const QualityList = {low: 'low', medium: 'medium', high: 'high'};
-const SpeedList = {
-    veryslow: 'veryslow',
-    slower: 'slower',
-    slow: 'slow',
-    medium: 'medium',
-    fast: 'fast',
-    faster: 'faster',
-    veryfast: 'veryfast',
-    superfast: 'superfast',
-    ultrafast: 'ultrafast'
-};
+const SpeedList = {slow: 'slow', normal: 'normal', fast: 'fast'};
 
 const CompressMediaOperation = ({type, runIfInputFileCorrect, mediaTools, navigate, progressModal, updateProgressModal}) => {
     const MediaTools = type === 'audio' ? AudioTools : VideoTools;
 
-    const [speed, setSpeed] = useState(SpeedList.veryslow);
-    const [quality, setQuality] = useState(QualityList.high);
+    const [speed, setSpeed] = useState(SpeedList.normal);
+    const [quality, setQuality] = useState(QualityList.medium);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const showCompressOptions = () => {

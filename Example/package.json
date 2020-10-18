@@ -18,7 +18,7 @@
     "prop-types": "^15.7.2",
     "react": "16.13.1",
     "react-native": "0.63.2",
-    "react-native-audio-video-tools": "../react-native-audio-video-tools-v1.0.0.tgz",
+    "react-native-audio-video-tools": "../",
     "react-native-document-picker": "^3.5.4",
     "react-native-dropdown-picker": "^3.6.8",
     "react-native-elements": "^2.3.2",
