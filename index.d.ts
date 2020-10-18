@@ -5,16 +5,10 @@
 declare module "react-native-audio-video-tools" {
     import {MediaInformation} from "react-native-ffmpeg";
 
-    enum Preset {
-        VERY_SLOW = 'veryslow',
-        SLOWER = 'slower',
+    enum Speed {
         SLOW = 'slow',
-        MEDIUM = 'medium',
+        NORMAL = 'normal',
         FAST = 'fast',
-        FASTER = 'faster',
-        VERY_FAST = 'veryfast',
-        SUPER_FAST = 'superfast',
-        ULTRA_FAST = 'ultrafast',
     }
 
     enum Quality {
@@ -33,7 +27,7 @@ declare module "react-native-audio-video-tools" {
     } & MediaDefaultParameters;
 
     export type CompressVideo = {
-        speed?: Preset;
+        speed?: Speed;
         bitrate?: string;
         quality?: Quality;
     } & MediaDefaultParameters;
@@ -99,7 +93,7 @@ declare module "react-native-audio-video-tools" {
         convertTo: (options: ConvertTo) => MediaDefaultResponse;
 
         /**
-         * Cut video
+         * Cut media
          */
         cut: (options: CutMedia) => MediaDefaultResponse;
 

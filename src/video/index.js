@@ -1,6 +1,6 @@
 import Media from "../Media";
 import {
-    getCompressionOptionsResolution,
+    getCompressionOptionsResolution, mapSpeedToPreset,
 } from '../utils';
 import {
     DEFAULT_COMPRESS_VIDEO_OPTIONS,
@@ -33,22 +33,20 @@ class VideoTools extends Media {
             const { outputFilePath } = checkInputAndOptionsResult;
 
             // get command options based of options parameters
-            const result = getCompressionOptionsResolution(options.quality);
+            const result = getCompressionOptionsResolution(options.quality, options.speed);
 
             // group command from calculated values
             const cmd = [
                 "-i", `"${this.mediaFullPath}"`,
                 "-c:v", "libx264",
                 "-crf", result["-crf"],
+                "-preset", result["-preset"],
             ];
 
             // Add bitrate if present
             if (options.bitrate) {
                 cmd.push("-b:v", options.bitrate);
             }
-
-            // Add preset
-            cmd.push("-preset", options.speed ? options.speed : DEFAULT_COMPRESS_VIDEO_OPTIONS.speed);
 
             // Add output file as last parameter
             cmd.push(`"${outputFilePath}"`);

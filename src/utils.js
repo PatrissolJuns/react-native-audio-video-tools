@@ -1,4 +1,4 @@
-import PRESET from './enums/Preset';
+import SPEED from './enums/Speed';
 import QUALITY from './enums/Quality';
 import {
     AUDIO_EXTENSIONS,
@@ -110,33 +110,14 @@ const getExtension = (path, type) => {
 
 /**
  * Perform operation based on options and return correspondent ffmpeg setting
- * @param quality
- * @returns {{"-crf": string}}
+ * @param quality: QUALITY
+ * @param speed: SPEED
+ * @returns {{"-crf": string,"-preset": string}}
  */
-const getCompressionOptionsResolution = (quality) => {
-    let _quality;
-
-    const result = {
-        "-crf": "",
-    };
-
-    switch (quality) {
-        case QUALITY.HIGH:
-            _quality = 14;
-            break;
-        case QUALITY.MEDIUM:
-            _quality = 18;
-            break;
-        case QUALITY.LOW:
-            _quality = 22;
-            break;
-        default: _quality = 14;
-    }
-
-    result["-crf"] = _quality.toString();
-
-    return result;
-};
+const getCompressionOptionsResolution = (quality, speed) => ({
+    "-crf": quality === QUALITY.LOW ? '28' : quality === QUALITY.MEDIUM ? '23' : '18',
+    "-preset": speed === SPEED.SLOW ? 'veryslow' : speed === SPEED.NORMAL ? 'medium' : 'fast'
+});
 
 /**
  * Check options for various operation
@@ -197,11 +178,11 @@ const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
                         };
                     }
                     if (options.speed &&
-                        !(PRESET.getStaticValueList().includes(options.speed))) {
+                        !(SPEED.getStaticValueList().includes(options.speed))) {
                         return {
                             isCorrect: false,
                             message: 'Incorrect option "speed". Please provide one of [' +
-                                PRESET.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
+                                SPEED.getStaticValueList().map(item => `"${item}"`).join(', ') + ']'
                         };
                     }
                 }

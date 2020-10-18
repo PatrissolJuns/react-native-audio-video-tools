@@ -1,4 +1,4 @@
-import PRESET from "./enums/Preset";
+import SPEED from "./enums/Speed";
 import QUALITY from "./enums/Quality";
 
 const INCORRECT_INPUT_PATH = 'Incorrect input path. Please provide a valid one';
@@ -11,7 +11,7 @@ const AUDIO_BITRATE = [256, 192, 160, 128, 96, 64, 32];
 
 const DEFAULT_COMPRESS_VIDEO_OPTIONS = {
     quality: QUALITY.MEDIUM,
-    speed: PRESET.VERY_SLOW,
+    speed: SPEED.NORMAL,
 };
 
 const DEFAULT_COMPRESS_AUDIO_OPTIONS = {

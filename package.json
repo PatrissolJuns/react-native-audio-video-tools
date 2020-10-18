@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "description": "A set of function to easily manipulate images, audios and videos",
+  "description": "React-native library that allows to perform some advanced operation on audios and videos",
   "main": "index.js",
   "types": "./index.d.ts",
   "repository": "https://github.com/PatrissolJuns/react-native-audio-video-tools.git",
@@ -28,7 +28,12 @@
     "tools",
     "ffmpeg",
     "compression",
-    "merging"
+    "video conversion",
+    "merging",
+    "trimming",
+    "extraction",
+    "convesion",
+    "media"
   ],
   "bugs": {
     "url": "https://github.com/PatrissolJuns/react-native-audio-video-tools/issues"
