@@ -25,8 +25,7 @@ Both local and remote media are handled and it's possible to perform the followi
 
 **An Example app is available with almost all features implemented. You can download APK for android [here](Example/android/app/release/app-release.apk)**
 
-![](gifs/example_app.gif)  |
-:---------------:|
+<img src="gifs/example_app.gif" width="300">
 
 ## Installation
 
