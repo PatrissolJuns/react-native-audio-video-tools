@@ -23,7 +23,7 @@ Both local and remote media are handled and it's possible to perform the followi
     - Conversion
     - Extraction of audio sound from video
 
-**An Example app is available with almost all features implemented. You can download APK for android [here](Example/android/app/release/app-release.apk)**
+**An Example app is available with almost all features implemented. You can build it in local or you can download APK for android [here](https://github.com/PatrissolJuns/react-native-audio-video-tools/raw/master/Example/android/app/release/app-release.apk)**
 
 <img src="gifs/example_app.gif" width="300">
 
