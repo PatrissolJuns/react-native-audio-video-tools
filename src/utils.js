@@ -36,10 +36,6 @@ const isMediaExtensionCorrect = (extension, type) => {
         const extensionList = type === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
         return extensionList.includes(extension.toLowerCase());
     }
-    console.log(extension);
-    console.log(type);
-    console.log("what is going on");
-
     return false;
 
 };
