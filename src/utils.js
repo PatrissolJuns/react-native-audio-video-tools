@@ -30,11 +30,14 @@ const isRemoteMedia = path => {
  * @returns {boolean}
  */
 const isMediaExtensionCorrect = (extension, type) => {
+
     if (typeof extension === 'string'
         && (type === 'audio' || type === 'video')) {
         const extensionList = type === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
         return extensionList.includes(extension.toLowerCase());
-    } return false;
+    }
+    return false;
+
 };
 
 /**
@@ -103,7 +106,6 @@ const getExtension = (path, type) => {
                 ? extension
                 : (type === 'audio' ? DEFAULT_AUDIO_EXTENSION : DEFAULT_VIDEO_EXTENSION);
         }
-
         return type === 'audio' ? DEFAULT_AUDIO_EXTENSION : DEFAULT_VIDEO_EXTENSION;
     } return extension;
 };
@@ -149,7 +151,24 @@ const isOptionsValueCorrect = (options, operation, mediaType = 'video') => {
                 // Remove the dot if the present
                 options.extension = options.extension.replace(/^\.?(\w+)$/, '$1');
 
+                // if  operation is extract Audio, we compare the extension with audio .
+                if (operation === "extractAudio") {
+                  if (!isMediaExtensionCorrect(options.extension, "audio")) {
+                    const extensionList = mediaType === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
+                    return {
+                        isCorrect: false,
+                        message: `Unknown extension ${options.extension}. Please provide one of [` +
+                            extensionList.map(item => `"${item}"`).join(', ') + ']'
+                    };
+                  } else {
+                    return {
+                      isCorrect: true,
+                    }
+                  }
+                }
+
                 // Check if extension is correct according to extension list
+
                 if (!isMediaExtensionCorrect(options.extension, mediaType)) {
                     const extensionList = mediaType === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
                     return {
